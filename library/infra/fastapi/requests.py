@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 
 from library.core.bitcoin_converter import BitcoinToCurrency
 from library.core.entities import User, Wallet, UsdWallet
-from library.core.errors import ClosedError, DoesNotExistError, DuplicateError
+from library.core.errors import ClosedError, DoesNotExistError, DuplicateError, WalletLimitReached
 from library.core.service import Service
 from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope
 from library.infra.fastapi.dependables import RepositoryDependable
@@ -26,12 +26,22 @@ def create_user(
 @api.post("/wallets/{user_key}", status_code=201, response_model=UsdWalletItemEnvelope, tags=["Wallets"])
 def create_wallet(
     user_key: UUID, repo_dependable: RepositoryDependable
-) -> dict[str, UsdWallet]:
-    wallet = Wallet(user_key=user_key)
-    Service(repo_dependable).create(wallet, "wallets")
-    usd = BitcoinToCurrency().convert(wallet.bitcoins)
-    usd_wallet = UsdWallet(wallet_address=wallet.address, bitcoins_balance=wallet.bitcoins, usd_balance=usd)
-    return {"usd_wallet": usd_wallet}
+) -> dict[str, UsdWallet] | JSONResponse:
+    try:
+        wallet = Wallet(user_key=user_key)
+        Service(repo_dependable).create_wallet(wallet)
+        usd = BitcoinToCurrency().convert(wallet.bitcoins)
+        usd_wallet = UsdWallet(wallet_address=wallet.address,
+                               bitcoins_balance=wallet.bitcoins,
+                               usd_balance=usd)
+        return {"usd_wallet": usd_wallet}
+    except WalletLimitReached:
+        #print('AEEEEEEe')
+        msg = WalletLimitReached().msg()
+        return JSONResponse(
+            status_code=409,
+            content={"error": {"message": msg}},
+        )
 
 
 @api.get(

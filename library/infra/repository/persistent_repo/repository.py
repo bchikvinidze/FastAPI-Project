@@ -90,9 +90,8 @@ class PersistentRepository:
         except TypeError:
             raise DoesNotExistError(entity_id)
 
-    """
     def read_multi(
-        self, entity_id: UUID, table_name: str, column_name: str = "ID"
+        self, entity_id: UUID, table_name: str, column_name: str = "USER_KEY"
     ) -> list[dict[str, object]]:
         try:
             str_to_execute = "SELECT * FROM {} WHERE {}='{}'".format(
@@ -102,14 +101,13 @@ class PersistentRepository:
             result = []
             for row in cursor:
                 result.append(row)
-            if len(result) == 0:
-                raise DoesNotExistError(entity_id)
             return result
         except KeyError:
             raise DoesNotExistError(entity_id)
         except TypeError:
             raise DoesNotExistError(entity_id)
 
+    """
     def read_all(self, table_name: str) -> list[dict[str, object]]:
         cursor = self.cur.execute("SELECT * FROM {}".format(table_name))
         result = []

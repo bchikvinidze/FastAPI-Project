@@ -18,12 +18,13 @@ class Repository(Protocol):
     ) -> dict[str, object]:
         pass
 
-    """
+
     def read_multi(
         self, entity_id: UUID, table_name: str, column_name: str = "ID"
     ) -> list[dict[str, object]]:
         pass
 
+    """
     def read_all(self, table_name: str) -> list[dict[str, object]]:
         pass
 

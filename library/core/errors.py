@@ -19,3 +19,9 @@ class UndefinedTableException(Exception):
 
 class UnsuccessfulRequest(Exception):
     pass
+
+
+class WalletLimitReached(Exception):
+    def msg(self) -> str:
+        return "wallet limit reached. Can't create any new wallets."
+

@@ -1,3 +1,3 @@
 DB_NAME = 'wallets_db'
 INITIAL_BITCOINS = 1.0
-
+WALLET_CNT_LIMIT = 3

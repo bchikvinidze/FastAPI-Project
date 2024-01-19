@@ -53,3 +53,16 @@ def test_wallet_create(client: TestClient) -> None:
                                         'bitcoins_balance': 1.0,
                                         'usd_balance': ANY}}
 
+
+def test_wallet_create_over_limit(client: TestClient) -> None:
+    response = client.post("/users")
+    user_key = response.json()["user"]["key"]
+
+    _ = client.post(f"/wallets/{user_key}")
+    _ = client.post(f"/wallets/{user_key}")
+    _ = client.post(f"/wallets/{user_key}")
+    response = client.post(f"/wallets/{user_key}")
+
+    assert response.status_code == 409
+    assert response.json() == {'error': {'message': "wallet limit reached. Can't create any new wallets."}}
+
