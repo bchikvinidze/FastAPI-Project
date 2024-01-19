@@ -36,7 +36,8 @@ class PersistentRepository:
         self.con.row_factory = self.dict_factory
         self.cur = self.con.cursor()
         self.tables = {
-            "users": ["key"]
+            "users": ["key"],
+            "wallets": ["address", "bitcoins", "user_key"]
         }
 
         for table in self.tables.keys():

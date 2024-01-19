@@ -26,8 +26,9 @@ class SerializerForDB:
     ) -> dict[str, object]:
         result = dt.__dict__
         result = {k: result[k] for k in columns}
+        #db can't accept UUID, so converting to string
         for key in result.keys():
-            if "key" in key:
+            if ("key" in key) or ("address" in key):
                 result[key] = str(result[key])
         return result
 
