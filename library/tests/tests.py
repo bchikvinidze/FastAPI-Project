@@ -41,5 +41,7 @@ def test_wallet_create(client: TestClient) -> None:
     response = client.post(f"/wallets/{user_key}")
 
     assert response.status_code == 201
-    assert response.json() == {"wallet": {"key": ANY}}
+    assert response.json() == {"wallet": {'address': ANY,
+                                        'bitcoins': 1.0,
+                                        'user_key': user_key}}
 
