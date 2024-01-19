@@ -36,10 +36,15 @@ def create_wallet(
                                usd_balance=usd)
         return {"usd_wallet": usd_wallet}
     except WalletLimitReached:
-        #print('AEEEEEEe')
         msg = WalletLimitReached().msg()
         return JSONResponse(
             status_code=409,
+            content={"error": {"message": msg}},
+        )
+    except DoesNotExistError:
+        msg = DoesNotExistError().msg("User", "key", str(user_key))
+        return JSONResponse(
+            status_code=404,
             content={"error": {"message": msg}},
         )
 

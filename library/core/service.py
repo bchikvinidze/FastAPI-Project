@@ -18,6 +18,9 @@ class Service:
         self.repo.create(input_entity, table_name)
 
     def create_wallet(self, wallet: Wallet) -> None:
+        user_cnt = len(self.repo.read_one(wallet.user_key, 'users'))
+        if user_cnt == 0:
+            raise DoesNotExistError
         wallet_count = len(self.repo.read_multi(wallet.user_key, 'wallets'))
         if wallet_count >= WALLET_CNT_LIMIT:
             raise WalletLimitReached

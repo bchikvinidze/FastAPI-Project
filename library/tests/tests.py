@@ -2,7 +2,7 @@ import os
 from random import choice
 from string import ascii_uppercase
 from unittest.mock import ANY
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 import pytest
 from fastapi.testclient import TestClient
@@ -65,4 +65,13 @@ def test_wallet_create_over_limit(client: TestClient) -> None:
 
     assert response.status_code == 409
     assert response.json() == {'error': {'message': "wallet limit reached. Can't create any new wallets."}}
+
+
+def test_wallet_unknown_user(client: TestClient) -> None:
+    unknown_user = uuid4()
+    response = client.post(f"/wallets/{unknown_user}")
+    assert response.status_code == 404
+    assert response.json() == {'error': {'message': f'User with key<{unknown_user}> does not exist.'}}
+
+
 
