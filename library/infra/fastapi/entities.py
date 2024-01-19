@@ -4,10 +4,10 @@ from uuid import UUID
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from library.core.entities import User, Wallet
+from library.core.entities import User, Wallet, UsdWallet
 from library.core.errors import ClosedError, DoesNotExistError, DuplicateError
 from library.core.service import Service
-from library.infra.fastapi.base_models import UserItemEnvelope, WalletItemEnvelope
+from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope
 from library.infra.fastapi.dependables import RepositoryDependable
 
 api = APIRouter()
@@ -22,13 +22,15 @@ def create_user(
     return {"user": new_user}
 
 
-@api.post("/wallets/{user_key}", status_code=201, response_model=WalletItemEnvelope, tags=["Wallets"])
+@api.post("/wallets/{user_key}", status_code=201, response_model=UsdWalletItemEnvelope, tags=["Wallets"])
 def create_wallet(
     user_key: UUID, repo_dependable: RepositoryDependable
-) -> dict[str, Wallet]:
+) -> dict[str, UsdWallet]:
     wallet = Wallet(user_key=user_key)
     Service(repo_dependable).create(wallet, "wallets")
-    return {"wallet": wallet}
+    usd = 1.0
+    usd_wallet = UsdWallet(wallet_address=wallet.address, bitcoins_balance=wallet.bitcoins, usd_balance=usd)
+    return {"usd_wallet": usd_wallet}
 
 
 @api.get(

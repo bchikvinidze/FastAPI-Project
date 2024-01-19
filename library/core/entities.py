@@ -26,3 +26,10 @@ class Wallet:
     user_key: UUID
     bitcoins: float = INITIAL_BITCOINS
     address: UUID = field(default_factory=uuid4)
+
+
+@dataclass(kw_only=True)
+class UsdWallet:
+    wallet_address: UUID
+    bitcoins_balance: float
+    usd_balance: float
