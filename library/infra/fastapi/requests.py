@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
+from library.core.bitcoin_converter import BitcoinToCurrency
 from library.core.entities import User, Wallet, UsdWallet
 from library.core.errors import ClosedError, DoesNotExistError, DuplicateError
 from library.core.service import Service
@@ -28,7 +29,7 @@ def create_wallet(
 ) -> dict[str, UsdWallet]:
     wallet = Wallet(user_key=user_key)
     Service(repo_dependable).create(wallet, "wallets")
-    usd = 1.0
+    usd = BitcoinToCurrency().convert(wallet.bitcoins)
     usd_wallet = UsdWallet(wallet_address=wallet.address, bitcoins_balance=wallet.bitcoins, usd_balance=usd)
     return {"usd_wallet": usd_wallet}
 

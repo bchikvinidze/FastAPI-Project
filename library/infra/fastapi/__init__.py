@@ -1,4 +1,4 @@
-from library.infra.fastapi.entities import api
+from library.infra.fastapi.requests import api
 
 __all__ = [
     "api",

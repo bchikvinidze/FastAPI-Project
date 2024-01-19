@@ -15,3 +15,7 @@ class ClosedError(Exception):
 
 class UndefinedTableException(Exception):
     pass
+
+
+class UnsuccessfulRequest(Exception):
+    pass

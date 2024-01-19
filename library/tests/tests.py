@@ -8,6 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from constants import DB_NAME
+from library.core.bitcoin_converter import BitcoinToCurrency
 from library.core.entities import User#Purchase, Receipt, Unit
 from library.core.errors import DoesNotExistError
 from library.core.serialization import SerializerForDB
@@ -32,6 +33,13 @@ def test_user_should_persist(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert response.json() == {"user": {"key": ANY}}
+
+
+def test_bitcoint_to_usd_api(client: TestClient) -> None:
+    converter = BitcoinToCurrency()
+    usd = converter.convert(10)
+
+    assert usd > 0
 
 
 def test_wallet_create(client: TestClient) -> None:
