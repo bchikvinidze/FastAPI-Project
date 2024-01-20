@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse
 
 from library.core.bitcoin_converter import BitcoinToCurrency
 from library.core.entities import User, Wallet, UsdWallet
-from library.core.errors import DoesNotExistError, WalletLimitReached
-from library.core.service import Service
+from library.core.errors import DoesNotExistError, WalletLimitReached, ApiKeyWrong
+from library.core.service import Service, Authenticator
 from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope
 from library.infra.fastapi.dependables import RepositoryDependable
 
@@ -30,7 +30,7 @@ def create_wallet(
 ) -> dict[str, UsdWallet] | JSONResponse:
     x_api_key = UUID(request.headers['x-api-key'])
     try:
-        Service(repo_dependable).exists(x_api_key, 'users')
+        Authenticator(repo_dependable).authenticate(x_api_key)
         wallet = Wallet(user_key=x_api_key)
         Service(repo_dependable).create_wallet(wallet)
         usd = BitcoinToCurrency().convert(wallet.bitcoins)
@@ -44,8 +44,8 @@ def create_wallet(
             status_code=409,
             content={"error": {"message": msg}},
         )
-    except DoesNotExistError:
-        msg = DoesNotExistError().msg("User", "key", str(x_api_key))
+    except ApiKeyWrong:
+        msg = ApiKeyWrong().msg()
         return JSONResponse(
             status_code=404,
             content={"error": {"message": msg}},
@@ -55,15 +55,14 @@ def create_wallet(
 @api.get(
     "/users/{user_key}/", status_code=200, response_model=UserItemEnvelope, tags=["Users"]
 )
-def read_one_unit(
+def read_one_user(
     user_key: UUID,
     request: Request,
     repo_dependable: RepositoryDependable
 ) -> dict[str, User] | JSONResponse:
     x_api_key = request.headers['x-api-key']
     try:
-        # next line will throw doesnotexist error if api key not working.
-        Service(repo_dependable).read(x_api_key, 'users')
+        Authenticator(repo_dependable).authenticate(x_api_key)
         return {"user": Service(repo_dependable).read(user_key, "users")}
     except DoesNotExistError:
         msg = DoesNotExistError().msg("User", "key", str(user_key))
@@ -71,4 +70,39 @@ def read_one_unit(
             status_code=404,
             content={"error": {"message": msg}},
         )
+    except ApiKeyWrong:
+        msg = ApiKeyWrong().msg()
+        return JSONResponse(
+            status_code=404,
+            content={"error": {"message": msg}},
+        )
 
+
+@api.get(
+    "/wallets/{address}/", status_code=200, response_model=UsdWalletItemEnvelope, tags=["Wallets"]
+)
+def read_wallet_address(
+    address: UUID,
+    request: Request,
+    repo_dependable: RepositoryDependable
+) -> dict[str, UsdWallet] | JSONResponse:
+    x_api_key = request.headers['x-api-key']
+    try:
+        Authenticator(repo_dependable).authenticate(x_api_key)
+        wallet: Wallet = Service(repo_dependable).read(address, 'wallets', 'address')
+        usd_wallet = UsdWallet(wallet_address=wallet.address,
+                               bitcoins_balance=wallet.bitcoins,
+                               usd_balance=BitcoinToCurrency().convert(wallet.bitcoins))
+        return {"usd_wallet": usd_wallet}
+    except DoesNotExistError:
+        msg = DoesNotExistError().msg("Wallet", "address", str(address))
+        return JSONResponse(
+            status_code=404,
+            content={"error": {"message": msg}},
+        )
+    except ApiKeyWrong:
+        msg = ApiKeyWrong().msg()
+        return JSONResponse(
+            status_code=404,
+            content={"error": {"message": msg}},
+        )

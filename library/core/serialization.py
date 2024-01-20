@@ -42,3 +42,10 @@ class SerializerForDB:
             config=Config(cast=[UUID]),
         )
         return result
+
+    def deserialize_wallet(self, input_data: dict[str, object]) -> entities.Wallet:
+        return from_dict(
+            data_class=entities.Wallet,
+            data=input_data,
+            config=Config(cast=[UUID]),
+        )

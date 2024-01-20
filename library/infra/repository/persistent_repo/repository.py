@@ -56,7 +56,7 @@ class PersistentRepository:
         self.con.commit()
 
     def read_one(
-        self, entity_id: UUID, table_name: str, column_name: str = "KEY"
+        self, entity_id: UUID, table_name: str, column_name: str
     ) -> dict[str, object]:
         try:
             str_to_execute = "SELECT * FROM {} WHERE {}='{}'".format(

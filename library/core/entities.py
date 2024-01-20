@@ -13,7 +13,7 @@ class SerializerDB:
 
 @dataclass(kw_only=True)
 class Entity(Protocol):
-    key: UUID = field(default_factory=uuid4)
+    key: UUID
 
 
 @dataclass(kw_only=True)
@@ -26,6 +26,7 @@ class Wallet:
     user_key: UUID
     bitcoins: float = INITIAL_BITCOINS
     address: UUID = field(default_factory=uuid4)
+    key: UUID = field(default_factory=uuid4)
 
 
 @dataclass(kw_only=True)
