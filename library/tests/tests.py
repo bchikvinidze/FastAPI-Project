@@ -7,7 +7,7 @@ from uuid import uuid4, UUID
 import pytest
 from fastapi.testclient import TestClient
 
-from constants import DB_NAME
+from constants import DB_NAME, WALLET_CNT_LIMIT
 from library.core.bitcoin_converter import BitcoinToCurrency
 from library.core.entities import User#Purchase, Receipt, Unit
 from library.core.errors import DoesNotExistError
@@ -27,15 +27,15 @@ def test_users_should_create(client: TestClient) -> None:
 
 def test_user_should_persist(client: TestClient) -> None:
     response = client.post("/users")
-    user_key = response.json()["user"]["key"]
+    api_key = response.json()["user"]["key"]
 
-    response = client.get(f"/users/{user_key}")
+    response = client.get(f"/users/{api_key}", headers={'x-api-key': api_key})
 
     assert response.status_code == 200
     assert response.json() == {"user": {"key": ANY}}
 
 
-def test_bitcoint_to_usd_api(client: TestClient) -> None:
+def test_bitcoin_to_usd_api(client: TestClient) -> None:
     converter = BitcoinToCurrency()
     usd = converter.convert(10)
 
@@ -44,9 +44,9 @@ def test_bitcoint_to_usd_api(client: TestClient) -> None:
 
 def test_wallet_create(client: TestClient) -> None:
     response = client.post("/users")
-    user_key = response.json()["user"]["key"]
+    api_key = response.json()["user"]["key"]
 
-    response = client.post(f"/wallets/{user_key}")
+    response = client.post(f"/wallets", headers={'x-api-key': api_key})
 
     assert response.status_code == 201
     assert response.json() == {"usd_wallet": {'wallet_address': ANY,
@@ -56,22 +56,20 @@ def test_wallet_create(client: TestClient) -> None:
 
 def test_wallet_create_over_limit(client: TestClient) -> None:
     response = client.post("/users")
-    user_key = response.json()["user"]["key"]
+    api_key = response.json()["user"]["key"]
+    print('type is:', type(api_key))
 
-    _ = client.post(f"/wallets/{user_key}")
-    _ = client.post(f"/wallets/{user_key}")
-    _ = client.post(f"/wallets/{user_key}")
-    response = client.post(f"/wallets/{user_key}")
+    for i in range(0, WALLET_CNT_LIMIT+1):
+        response = client.post(f"/wallets", headers={'x-api-key': api_key})
 
     assert response.status_code == 409
     assert response.json() == {'error': {'message': "wallet limit reached. Can't create any new wallets."}}
 
 
-def test_wallet_unknown_user(client: TestClient) -> None:
-    unknown_user = uuid4()
-    response = client.post(f"/wallets/{unknown_user}")
+def test_wallet_unknown_key(client: TestClient) -> None:
+    api_key = uuid4().__str__()
+    response = client.post(f"/wallets", headers={'x-api-key': api_key})
+
     assert response.status_code == 404
-    assert response.json() == {'error': {'message': f'User with key<{unknown_user}> does not exist.'}}
-
-
+    assert response.json() == {'error': {'message': f'User with key<{api_key}> does not exist.'}}
 

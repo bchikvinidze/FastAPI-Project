@@ -42,31 +42,3 @@ class SerializerForDB:
             config=Config(cast=[UUID]),
         )
         return result
-
-    def deserialize_unit(self, input_data: dict[str, object]) -> entities.Unit:
-        return from_dict(
-            data_class=entities.Unit,
-            data=input_data,
-            config=Config(cast=[UUID]),
-        )
-
-    def deserialize_product(self, input_data: dict[str, object]) -> entities.Product:
-        return from_dict(
-            data_class=entities.Product,
-            data=input_data,
-            config=Config(cast=[UUID]),
-        )
-
-    def deserialize_receipt(self, input_data: dict[str, object]) -> entities.Receipt:
-        return from_dict(
-            data_class=entities.Receipt,
-            data=input_data,
-            config=Config(cast=[UUID]),
-        )
-
-    def deserialize_purchase(self, input_data: dict[str, object]) -> entities.Purchase:
-        return from_dict(
-            data_class=entities.Purchase,
-            data=input_data,
-            config=Config(cast=[UUID]),
-        )

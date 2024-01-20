@@ -3,16 +3,6 @@ class DoesNotExistError(Exception):
         return cls_name + " with " + attr + "<" + inp + "> does not exist."
 
 
-class DuplicateError(Exception):
-    def msg(self, cls_name: str, attr: str, inp: str) -> str:
-        return cls_name + " with " + attr + "<" + inp + "> already exists."
-
-
-class ClosedError(Exception):
-    def msg(self, cls_name: str, attr: str, inp: str) -> str:
-        return cls_name + " with " + attr + "<" + inp + "> is closed."
-
-
 class UndefinedTableException(Exception):
     pass
 
@@ -24,4 +14,3 @@ class UnsuccessfulRequest(Exception):
 class WalletLimitReached(Exception):
     def msg(self) -> str:
         return "wallet limit reached. Can't create any new wallets."
-

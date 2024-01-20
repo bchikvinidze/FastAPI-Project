@@ -5,28 +5,9 @@ from uuid import UUID
 from constants import DB_NAME
 from library.core.entities import Entity
 from library.core.errors import (
-    ClosedError,
     DoesNotExistError,
-    DuplicateError,
-    UndefinedTableException,
 )
 from library.core.serialization import SerializerForDB
-
-"""
-def deserialize_row(
-    table_name: str, row: dict[str, object]
-) -> Unit | Product | Receipt | Purchase:
-    if table_name == "units":
-        return SerializerForDB().deserialize_unit(row)
-    elif table_name == "products":
-        return SerializerForDB().deserialize_product(row)
-    elif table_name == "receipts":
-        return SerializerForDB().deserialize_receipt(row)
-    elif table_name == "purchases":
-        return SerializerForDB().deserialize_purchase(row)
-    else:
-        raise UndefinedTableException
-"""
 
 
 class PersistentRepository:
@@ -107,57 +88,6 @@ class PersistentRepository:
         except TypeError:
             raise DoesNotExistError(entity_id)
 
-    """
-    def read_all(self, table_name: str) -> list[dict[str, object]]:
-        cursor = self.cur.execute("SELECT * FROM {}".format(table_name))
-        result = []
-        for row in cursor:
-            result.append(row)
-        return result
-
-    def update(
-        self, entity_id: UUID, table_name: str, changes: dict[str, object]
-    ) -> None:
-        try:
-            self.read_one(entity_id, table_name)  # will throw exception if needed
-            set_sql = ", ".join(
-                [
-                    "{}={}".format(
-                        k,
-                        '"' + str(changes[k]) + '"'
-                        if isinstance(changes[k], str)
-                        else changes[k],
-                    )
-                    for k in changes.keys()
-                ]
-            )
-            sql_query = "UPDATE {} SET {} WHERE id = '{}'".format(
-                table_name, set_sql, entity_id
-            )
-            self.cur.execute(sql_query)
-            self.con.commit()
-        except KeyError:
-            raise DoesNotExistError(entity_id)
-
-    def delete(self, entity_id: UUID, table_name: str) -> None:
-        try:
-            self.read_one(entity_id, table_name)
-            str_to_execute = "SELECT * FROM {} WHERE ID='{}'".format(
-                table_name, entity_id
-            )
-            result = self.cur.execute(str_to_execute).fetchone()
-
-            if table_name == "receipts" and result["status"] == "closed":
-                raise ClosedError(entity_id)
-            else:
-                str_to_execute = "DELETE FROM {} WHERE ID='{}'".format(
-                    table_name, entity_id
-                )
-                self.cur.execute(str_to_execute)
-                self.con.commit()
-        except KeyError:
-            raise DoesNotExistError(entity_id)
-    """
     def drop_all(self) -> None:
         for table in self.tables.keys():
             self.cur.execute("DROP TABLE " + table)

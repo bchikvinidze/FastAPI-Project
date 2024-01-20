@@ -33,3 +33,9 @@ class Service:
         return SerializerForDB().deserialize(
             table_name, res
         )
+
+    def exists(self, entity_id: UUID, table_name: str) -> bool:
+        res = self.repo.read_one(entity_id, table_name)
+        if len(res) == 0:
+            return False
+        return True

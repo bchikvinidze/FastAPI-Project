@@ -18,22 +18,7 @@ class Repository(Protocol):
     ) -> dict[str, object]:
         pass
 
-
     def read_multi(
         self, entity_id: UUID, table_name: str, column_name: str = "ID"
     ) -> list[dict[str, object]]:
         pass
-
-    """
-    def read_all(self, table_name: str) -> list[dict[str, object]]:
-        pass
-
-    def update(
-        self, entity_id: UUID, table_name: str, changes: dict[str, object]
-    ) -> None:
-        pass
-
-    def delete(self, entity_id: UUID, table_name: str) -> None:
-        pass
-
-    """

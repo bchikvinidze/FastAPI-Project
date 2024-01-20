@@ -1,12 +1,12 @@
-from typing import Any
+from typing import Any, Annotated
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Header, Request
 from fastapi.responses import JSONResponse
 
 from library.core.bitcoin_converter import BitcoinToCurrency
 from library.core.entities import User, Wallet, UsdWallet
-from library.core.errors import ClosedError, DoesNotExistError, DuplicateError, WalletLimitReached
+from library.core.errors import DoesNotExistError, WalletLimitReached
 from library.core.service import Service
 from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope
 from library.infra.fastapi.dependables import RepositoryDependable
@@ -23,12 +23,15 @@ def create_user(
     return {"user": new_user}
 
 
-@api.post("/wallets/{user_key}", status_code=201, response_model=UsdWalletItemEnvelope, tags=["Wallets"])
+@api.post("/wallets", status_code=201, response_model=UsdWalletItemEnvelope, tags=["Wallets"])
 def create_wallet(
-    user_key: UUID, repo_dependable: RepositoryDependable
+    request: Request,
+    repo_dependable: RepositoryDependable
 ) -> dict[str, UsdWallet] | JSONResponse:
+    x_api_key = UUID(request.headers['x-api-key'])
     try:
-        wallet = Wallet(user_key=user_key)
+        Service(repo_dependable).exists(x_api_key, 'users')
+        wallet = Wallet(user_key=x_api_key)
         Service(repo_dependable).create_wallet(wallet)
         usd = BitcoinToCurrency().convert(wallet.bitcoins)
         usd_wallet = UsdWallet(wallet_address=wallet.address,
@@ -42,7 +45,7 @@ def create_wallet(
             content={"error": {"message": msg}},
         )
     except DoesNotExistError:
-        msg = DoesNotExistError().msg("User", "key", str(user_key))
+        msg = DoesNotExistError().msg("User", "key", str(x_api_key))
         return JSONResponse(
             status_code=404,
             content={"error": {"message": msg}},
@@ -50,12 +53,17 @@ def create_wallet(
 
 
 @api.get(
-    "/users/{user_key}", status_code=200, response_model=UserItemEnvelope, tags=["Users"]
+    "/users/{user_key}/", status_code=200, response_model=UserItemEnvelope, tags=["Users"]
 )
 def read_one_unit(
-    user_key: UUID, repo_dependable: RepositoryDependable
+    user_key: UUID,
+    request: Request,
+    repo_dependable: RepositoryDependable
 ) -> dict[str, User] | JSONResponse:
+    x_api_key = request.headers['x-api-key']
     try:
+        # next line will throw doesnotexist error if api key not working.
+        Service(repo_dependable).read(x_api_key, 'users')
         return {"user": Service(repo_dependable).read(user_key, "users")}
     except DoesNotExistError:
         msg = DoesNotExistError().msg("User", "key", str(user_key))
