@@ -33,3 +33,13 @@ class UsdWallet:
     wallet_address: UUID
     bitcoins_balance: float
     usd_balance: float
+
+
+@dataclass(kw_only=True)
+class Transaction:
+    address_from: UUID
+    address_to: UUID
+    amount: float
+    fee_amount: float
+    key: UUID = field(default_factory=uuid4)
+

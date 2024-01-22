@@ -22,3 +22,6 @@ class Repository(Protocol):
         self, entity_id: UUID, table_name: str, column_name: str = "USER_KEY"
     ) -> list[dict[str, object]]:
         pass
+
+    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: dict[str, object]) -> None:
+        pass

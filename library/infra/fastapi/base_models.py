@@ -25,6 +25,14 @@ class UsdWalletItem(BaseModel):
     usd_balance: float
 
 
+class TransactionItem(BaseModel):
+    address_from: UUID
+    address_to: UUID
+    amount: float
+    fee_amount: float
+    key: UUID
+
+
 # Envelopes for item
 class UserItemEnvelope(BaseModel):
     user: UserItem

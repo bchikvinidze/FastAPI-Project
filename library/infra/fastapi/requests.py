@@ -6,9 +6,11 @@ from fastapi.responses import JSONResponse
 
 from library.core.bitcoin_converter import BitcoinToCurrency
 from library.core.entities import User, Wallet, UsdWallet, Entity
-from library.core.errors import DoesNotExistError, WalletLimitReached, ApiKeyWrong
+from library.core.errors import DoesNotExistError, WalletLimitReached, ApiKeyWrong, WalletAddressNotOwn, \
+    SendAmountExceedsBalance
 from library.core.service import Service, Authenticator
-from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope, WalletItemEnvelope
+from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope, WalletItemEnvelope, \
+    TransactionItem
 from library.infra.fastapi.dependables import RepositoryDependable
 
 api = APIRouter()
@@ -48,6 +50,42 @@ def create_wallet(
         msg = ApiKeyWrong().msg()
         return JSONResponse(
             status_code=404,
+            content={"error": {"message": msg}},
+        )
+
+
+@api.post("/transactions/{wallet_from}/{wallet_to}/{send_amount}",
+          status_code=201,
+          response_model=TransactionItem,
+          tags=["Transactions"])
+def create_transaction(
+    wallet_from: UUID,
+    wallet_to: UUID,
+    send_amount: float,
+    request: Request,
+    repo_dependable: RepositoryDependable
+) -> JSONResponse:
+    x_api_key = UUID(request.headers['x-api-key'])
+    try:
+        Authenticator(repo_dependable).authenticate(x_api_key)
+        Service(repo_dependable).transfer(wallet_from, wallet_to, send_amount, x_api_key)
+        return JSONResponse(status_code=201, content={})
+    except ApiKeyWrong:
+        msg = ApiKeyWrong().msg()
+        return JSONResponse(
+            status_code=404,
+            content={"error": {"message": msg}},
+        )
+    except WalletAddressNotOwn:
+        msg = WalletAddressNotOwn().msg()
+        return JSONResponse(
+            status_code=403,
+            content={"error": {"message": msg}},
+        )
+    except SendAmountExceedsBalance:
+        msg = SendAmountExceedsBalance().msg()
+        return JSONResponse(
+            status_code=403,
             content={"error": {"message": msg}},
         )
 

@@ -18,7 +18,8 @@ class PersistentRepository:
         self.cur = self.con.cursor()
         self.tables = {
             "users": ["key"],
-            "wallets": ["address", "bitcoins", "user_key", "key"]
+            "wallets": ["address", "bitcoins", "user_key", "key"],
+            "transactions": ["address_from", "address_to", "amount", "fee_amount", "key"]
         }
 
         for table in self.tables.keys():
@@ -86,6 +87,28 @@ class PersistentRepository:
         except KeyError:
             raise DoesNotExistError(entity_id)
         except TypeError:
+            raise DoesNotExistError(entity_id)
+
+    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: dict[str, object]) -> None:
+        try:
+            self.read_one(entity_id, table_name, column_name)  # will throw exception if needed
+            set_sql = ", ".join(
+                [
+                    "{}={}".format(
+                        k,
+                        '"' + str(changes[k]) + '"'
+                        if isinstance(changes[k], str)
+                        else changes[k],
+                    )
+                    for k in changes.keys()
+                ]
+            )
+            sql_query = "UPDATE {} SET {} WHERE {} = '{}'".format(
+                table_name, set_sql, column_name, entity_id
+            )
+            self.cur.execute(sql_query)
+            self.con.commit()
+        except KeyError:
             raise DoesNotExistError(entity_id)
 
     def drop_all(self) -> None:
