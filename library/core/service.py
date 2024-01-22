@@ -44,8 +44,8 @@ class Service:
         return True
 
     def transfer(self, wallet_from_address: UUID, wallet_to_address: UUID, send_amount: float, x_api_key: UUID) -> None:
-        wallet_from = self.read(wallet_from_address, "wallets", "address")
-        wallet_to = self.read(wallet_to_address, "wallets", "address")
+        wallet_from = SerializerForDB().deserialize_wallet(self.repo.read_one(wallet_from_address, "wallets", "address"))
+        wallet_to = SerializerForDB().deserialize_wallet(self.repo.read_one(wallet_to_address, "wallets", "address"))
 
         if wallet_from.user_key != x_api_key:
             raise WalletAddressNotOwn
@@ -56,7 +56,7 @@ class Service:
         if wallet_from_initial < send_amount:
             raise SendAmountExceedsBalance
 
-        fee_percent = 0
+        fee_percent = 0.0
         if wallet_from.user_key != wallet_to.user_key:
             fee_percent = TRANSACTION_FEE
 

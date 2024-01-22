@@ -89,7 +89,7 @@ class PersistentRepository:
         except TypeError:
             raise DoesNotExistError(entity_id)
 
-    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: dict[str, object]) -> None:
+    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: dict[str, Any]) -> None:
         try:
             self.read_one(entity_id, table_name, column_name)  # will throw exception if needed
             set_sql = ", ".join(
