@@ -5,10 +5,10 @@ from fastapi import APIRouter, Header, Request
 from fastapi.responses import JSONResponse
 
 from library.core.bitcoin_converter import BitcoinToCurrency
-from library.core.entities import User, Wallet, UsdWallet
+from library.core.entities import User, Wallet, UsdWallet, Entity
 from library.core.errors import DoesNotExistError, WalletLimitReached, ApiKeyWrong
 from library.core.service import Service, Authenticator
-from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope
+from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope, WalletItemEnvelope
 from library.infra.fastapi.dependables import RepositoryDependable
 
 api = APIRouter()
@@ -59,7 +59,7 @@ def read_one_user(
     user_key: UUID,
     request: Request,
     repo_dependable: RepositoryDependable
-) -> dict[str, User] | JSONResponse:
+) -> dict[str, Entity] | JSONResponse:
     x_api_key = request.headers['x-api-key']
     try:
         Authenticator(repo_dependable).authenticate(UUID(x_api_key))
@@ -79,21 +79,18 @@ def read_one_user(
 
 
 @api.get(
-    "/wallets/{address}/", status_code=200, response_model=UsdWalletItemEnvelope, tags=["Wallets"]
+    "/wallets/{address}/", status_code=200, response_model=WalletItemEnvelope, tags=["Wallets"]
 )
 def read_wallet_address(
     address: UUID,
     request: Request,
     repo_dependable: RepositoryDependable
-) -> dict[str, UsdWallet] | JSONResponse:
+) -> dict[str, UUID | float] | JSONResponse:
     x_api_key = request.headers['x-api-key']
     try:
         Authenticator(repo_dependable).authenticate(UUID(x_api_key))
-        wallet: Wallet = Service(repo_dependable).read(address, 'wallets', 'address')
-        usd_wallet = UsdWallet(wallet_address=wallet.address,
-                               bitcoins_balance=wallet.bitcoins,
-                               usd_balance=BitcoinToCurrency().convert(wallet.bitcoins))
-        return {"usd_wallet": usd_wallet}
+        bitcoins = Service(repo_dependable).read_wallet_bitcoins(address, 'wallets', 'address')
+        return {"wallet_address": address, 'bitcoins': bitcoins, 'usd': BitcoinToCurrency().convert(bitcoins)}
     except DoesNotExistError:
         msg = DoesNotExistError().msg("Wallet", "address", str(address))
         return JSONResponse(

@@ -9,7 +9,7 @@ from library.core.errors import DoesNotExistError, WalletLimitReached, ApiKeyWro
 from library.core.serialization import SerializerForDB
 from library.infra.repository.repository import Repository
 
-
+#drota ganmavlobashi chavshli ramdenime servisad - wallets tavisi eqneba, trannazqciebs - tavisi da a.sh
 @dataclass
 class Service:
     repo: Repository
@@ -23,6 +23,10 @@ class Service:
             raise WalletLimitReached
         input_entity: Entity = wallet
         self.repo.create(input_entity, "wallets")
+
+    def read_wallet_bitcoins(self, entity_id: UUID, table_name: str, column_name: str = "key") -> float:
+        res = self.repo.read_one(entity_id, table_name, column_name)
+        return SerializerForDB().deserialize_wallet(res).bitcoins
 
     def read(
         self, entity_id: UUID, table_name: str, column_name: str = "key"

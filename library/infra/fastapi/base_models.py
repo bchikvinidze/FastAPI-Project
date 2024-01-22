@@ -33,4 +33,11 @@ class UserItemEnvelope(BaseModel):
 class UsdWalletItemEnvelope(BaseModel):
     usd_wallet: UsdWalletItem
 
+
+class WalletItemEnvelope(BaseModel):
+    wallet_address: UUID
+    bitcoins: float
+    usd: float
+
+
 # Envelopes for list

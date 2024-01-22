@@ -76,7 +76,7 @@ def test_wallet_persists(client: TestClient) -> None:
     response = client.get(f"/wallets/{address}", headers={'x-api-key': api_key})
 
     assert response.status_code == 200
-    assert response.json() == {"usd_wallet": {'wallet_address': address,
-                                              'bitcoins_balance': 1.0,
-                                              'usd_balance': ANY}}
+    assert response.json() == {'wallet_address': address,
+                               'bitcoins': ANY,
+                               'usd': ANY}
 
