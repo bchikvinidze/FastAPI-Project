@@ -21,12 +21,15 @@ class Service:
         wallet_count = len(self.repo.read_multi(wallet.user_key, 'wallets'))
         if wallet_count >= WALLET_CNT_LIMIT:
             raise WalletLimitReached
-        self.repo.create(wallet, "wallets")
+        input_entity: Entity = wallet
+        self.repo.create(input_entity, "wallets")
 
     def read(
         self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> User | Wallet | Entity:
         res = self.repo.read_one(entity_id, table_name, column_name)
+        if table_name == "wallets": #es dzaan sashinelebaa, if ar unda mchirdebodes wesit
+            return SerializerForDB().deserialize_wallet(res)
         return SerializerForDB().deserialize(table_name, res)
 
     def exists(self, entity_id: UUID, table_name: str, column_name: str = "key") -> bool:

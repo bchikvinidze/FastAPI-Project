@@ -14,11 +14,11 @@ class Repository(Protocol):
         pass
 
     def read_one(
-        self, entity_id: UUID, table_name: str, column_name: str = "ID"
+        self, entity_id: UUID, table_name: str, column_name: str
     ) -> dict[str, object]:
         pass
 
     def read_multi(
-        self, entity_id: UUID, table_name: str, column_name: str = "ID"
+        self, entity_id: UUID, table_name: str, column_name: str = "USER_KEY"
     ) -> list[dict[str, object]]:
         pass

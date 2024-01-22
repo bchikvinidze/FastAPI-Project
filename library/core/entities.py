@@ -11,7 +11,6 @@ class SerializerDB:
     pass
 
 
-@dataclass(kw_only=True)
 class Entity(Protocol):
     key: UUID
 

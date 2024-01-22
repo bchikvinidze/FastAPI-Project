@@ -62,7 +62,7 @@ def read_one_user(
 ) -> dict[str, User] | JSONResponse:
     x_api_key = request.headers['x-api-key']
     try:
-        Authenticator(repo_dependable).authenticate(x_api_key)
+        Authenticator(repo_dependable).authenticate(UUID(x_api_key))
         return {"user": Service(repo_dependable).read(user_key, "users")}
     except DoesNotExistError:
         msg = DoesNotExistError().msg("User", "key", str(user_key))
@@ -88,7 +88,7 @@ def read_wallet_address(
 ) -> dict[str, UsdWallet] | JSONResponse:
     x_api_key = request.headers['x-api-key']
     try:
-        Authenticator(repo_dependable).authenticate(x_api_key)
+        Authenticator(repo_dependable).authenticate(UUID(x_api_key))
         wallet: Wallet = Service(repo_dependable).read(address, 'wallets', 'address')
         usd_wallet = UsdWallet(wallet_address=wallet.address,
                                bitcoins_balance=wallet.bitcoins,

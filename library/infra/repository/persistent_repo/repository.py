@@ -18,7 +18,7 @@ class PersistentRepository:
         self.cur = self.con.cursor()
         self.tables = {
             "users": ["key"],
-            "wallets": ["address", "bitcoins", "user_key"]
+            "wallets": ["address", "bitcoins", "user_key", "key"]
         }
 
         for table in self.tables.keys():

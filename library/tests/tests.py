@@ -79,3 +79,4 @@ def test_wallet_persists(client: TestClient) -> None:
     assert response.json() == {"usd_wallet": {'wallet_address': address,
                                               'bitcoins_balance': 1.0,
                                               'usd_balance': ANY}}
+
