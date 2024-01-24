@@ -5,12 +5,12 @@ from fastapi import APIRouter, Header, Request
 from fastapi.responses import JSONResponse
 
 from library.core.bitcoin_converter import BitcoinToCurrency
-from library.core.entities import User, Wallet, UsdWallet, Entity
+from library.core.entities import User, Wallet, UsdWallet, Entity, Transaction
 from library.core.errors import DoesNotExistError, WalletLimitReached, ApiKeyWrong, WalletAddressNotOwn, \
     SendAmountExceedsBalance
 from library.core.service import Service, Authenticator
 from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope, WalletItemEnvelope, \
-    TransactionItem
+    TransactionItem, TransactionListEnvelope
 from library.infra.fastapi.dependables import RepositoryDependable
 
 api = APIRouter()
@@ -54,20 +54,22 @@ def create_wallet(
         )
 
 
-@api.post("/transactions/{wallet_from}/{wallet_to}/{send_amount}",
+# es shesacvlelia: query parameters ar unda iyos rogorc gavige. request-shi unda iyos es wallet from, to da amount.
+@api.post("/transactions",
           status_code=201,
           response_model=TransactionItem,
           tags=["Transactions"])
 def create_transaction(
-    wallet_from: UUID,
-    wallet_to: UUID,
-    send_amount: float,
+    transaction: dict[str, UUID | float],
     request: Request,
     repo_dependable: RepositoryDependable
 ) -> JSONResponse:
     x_api_key = UUID(request.headers['x-api-key'])
     try:
         Authenticator(repo_dependable).authenticate(x_api_key)
+        wallet_from = transaction['address_from']
+        wallet_to = transaction['address_to']
+        send_amount = transaction['amount']
         Service(repo_dependable).transfer(wallet_from, wallet_to, send_amount, x_api_key)
         return JSONResponse(status_code=201, content={})
     except ApiKeyWrong:
@@ -141,3 +143,24 @@ def read_wallet_address(
             status_code=404,
             content={"error": {"message": msg}},
         )
+
+
+@api.get(
+    "/transactions", status_code=200, response_model=TransactionListEnvelope, tags=["transactions"]
+)
+def read_transactions(
+    request: Request,
+    repo_dependable: RepositoryDependable
+) -> dict[str, Transaction] | JSONResponse:
+    x_api_key = request.headers['x-api-key']
+    try:
+        Authenticator(repo_dependable).authenticate(UUID(x_api_key))
+        transactions = Service(repo_dependable).read_multi(x_api_key, 'transactions', )
+        return {"transactions": transactions}
+    except ApiKeyWrong:
+        msg = ApiKeyWrong().msg()
+        return JSONResponse(
+            status_code=404,
+            content={"error": {"message": msg}},
+        )
+

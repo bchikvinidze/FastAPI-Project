@@ -40,6 +40,6 @@ class Transaction:
     address_from: UUID
     address_to: UUID
     amount: float
-    fee_amount: float
+    fee_amount: float = 0.0
     key: UUID = field(default_factory=uuid4)
 

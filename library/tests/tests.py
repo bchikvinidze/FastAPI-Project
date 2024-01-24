@@ -1,3 +1,9 @@
+'''
+
+winaze feedback mivige rom radgan bevri testebia , calcalke failebshi sjobs mqondes.
+axla ert failshia rom yvela ertad martivad gavushva magram bolosken calcalke failebad gadanawileba kargi ideaa
+'''
+
 import os
 from random import choice
 from string import ascii_uppercase
@@ -9,6 +15,7 @@ from fastapi.testclient import TestClient
 
 from constants import WALLET_CNT_LIMIT
 from library.core.bitcoin_converter import BitcoinToCurrency
+from library.core.entities import Transaction
 
 
 # Users
@@ -80,30 +87,34 @@ def test_wallet_persists(client: TestClient) -> None:
                                'bitcoins': ANY,
                                'usd': ANY}
 
+
 # transaction tests are quite heavy - I'm not a huge fan.
 def test_transaction_own(client: TestClient) -> None:
-    #create user and wallets
+    # create user and wallets
     response = client.post("/users")
     api_key = response.json()["user"]["key"]
 
-    #wallet number 1
+    # wallet number 1
     response = client.post("/wallets", headers={'x-api-key': api_key})
     resp_wallet = response.json()['usd_wallet']
     wallet_from = resp_wallet['wallet_address']
     bitcoin_from_initial = resp_wallet['bitcoins_balance']
 
-    #wallet number 2
+    # wallet number 2
     response = client.post("/wallets", headers={'x-api-key': api_key})
     resp_wallet = response.json()['usd_wallet']
     wallet_to = resp_wallet['wallet_address']
     bitcoin_to_initial = resp_wallet['bitcoins_balance']
 
-    #do transaction
+    # do transaction
     send_amount = 0.7
-    transaction_response = client.post(f"/transactions/{wallet_from}/{wallet_to}/{send_amount}",
-                           headers={'x-api-key': api_key})
+    transaction_response = client.post(f"/transactions",
+                                       headers={'x-api-key': api_key},
+                                       json={"address_from": wallet_from,
+                                             "address_to": wallet_to,
+                                             "amount": send_amount})
 
-    #observe post-transaction balances:
+    # observe post-transaction balances:
     wallet_from_response = client.get(f"/wallets/{wallet_from}", headers={'x-api-key': api_key})
     bitcoin_from_final = wallet_from_response.json()['bitcoins']
     wallet_to_response = client.get(f"/wallets/{wallet_to}", headers={'x-api-key': api_key})
@@ -127,7 +138,7 @@ def test_transaction_send_from_not_own(client: TestClient) -> None:
     resp_wallet = response.json()['usd_wallet']
     own_wallet = resp_wallet['wallet_address']
 
-    #creation of another wallet for another user:
+    # creation of another wallet for another user:
     response2 = client.post("/users")
     api_key2 = response2.json()["user"]["key"]
     response2 = client.post("/wallets", headers={'x-api-key': api_key2})
@@ -136,8 +147,12 @@ def test_transaction_send_from_not_own(client: TestClient) -> None:
 
     # do transaction
     send_amount = 0.7
-    transaction_response = client.post(f"/transactions/{foreign_wallet}/{own_wallet}/{send_amount}",
-                                       headers={'x-api-key': api_key})
+    transaction_response = client.post(f"/transactions",
+                                       headers={'x-api-key': api_key},
+                                       json={"address_from": foreign_wallet,
+                                             "address_to": own_wallet,
+                                             "amount": send_amount}
+                                       )
 
     assert transaction_response.status_code == 403
     assert transaction_response.json() == {'error': {'message': "Can only transfer from own wallet addresses"}}
@@ -162,9 +177,43 @@ def test_transaction_overspend(client: TestClient) -> None:
 
     # do transaction
     send_amount = 10
+    transaction_response = client.post(f"/transactions",
+                                       headers={'x-api-key': api_key},
+                                       json={"address_from": wallet_from,
+                                             "address_to": wallet_to,
+                                             "amount": send_amount}
+                                       )
+
+    assert transaction_response.status_code == 403
+    assert transaction_response.json() == {
+        'error': {'message': "Can only transfer if balance is more than send amount"}}
+
+
+def test_transactions_get(client: TestClient) -> None:
+    # create user and wallets
+    response = client.post("/users")
+    api_key = response.json()["user"]["key"]
+
+    # wallet number 1
+    response = client.post("/wallets", headers={'x-api-key': api_key})
+    resp_wallet = response.json()['usd_wallet']
+    wallet_from = resp_wallet['wallet_address']
+    bitcoin_from_initial = resp_wallet['bitcoins_balance']
+
+    # wallet number 2
+    response = client.post("/wallets", headers={'x-api-key': api_key})
+    resp_wallet = response.json()['usd_wallet']
+    wallet_to = resp_wallet['wallet_address']
+    bitcoin_to_initial = resp_wallet['bitcoins_balance']
+
+    # do transaction
+    send_amount = 0.7
+    #transaction = Transaction(address_from=wallet_from, address_to=wallet_to, amount=send_amount)
     transaction_response = client.post(f"/transactions/{wallet_from}/{wallet_to}/{send_amount}",
                                        headers={'x-api-key': api_key})
 
-    assert transaction_response.status_code == 403
-    assert transaction_response.json() == {'error': {'message': "Can only transfer if balance is more than send amount"}}
+    get_response = client.get("/transactions", headers={'x-api-key': api_key})
+
+    assert get_response.status_code == 200
+    assert get_response.json() == {'transactions': []}
 
