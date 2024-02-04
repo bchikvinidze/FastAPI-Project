@@ -151,10 +151,10 @@ def read_wallet_address(
 def read_transactions(
     request: Request,
     repo_dependable: RepositoryDependable
-) -> dict[str, Transaction] | JSONResponse:
-    x_api_key = request.headers['x-api-key']
+) -> dict[str, list[Transaction]] | JSONResponse:
+    x_api_key = UUID(request.headers['x-api-key'])
     try:
-        Authenticator(repo_dependable).authenticate(UUID(x_api_key))
+        Authenticator(repo_dependable).authenticate(x_api_key)
         transactions = Service(repo_dependable).read_multi(x_api_key, 'transactions', )
         return {"transactions": transactions}
     except ApiKeyWrong:
@@ -164,3 +164,5 @@ def read_transactions(
             content={"error": {"message": msg}},
         )
 
+
+# p
