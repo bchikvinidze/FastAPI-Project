@@ -208,12 +208,16 @@ def test_transactions_get(client: TestClient) -> None:
 
     # do transaction
     send_amount = 0.7
-    transaction_response = client.post(f"/transactions/{wallet_from}/{wallet_to}/{send_amount}",
-                                       headers={'x-api-key': api_key})
-
+    transaction_response = client.post('/transactions',
+                                       headers={'x-api-key': api_key},
+                                       json={"address_from": wallet_from,
+                                             "address_to": wallet_to,
+                                             "amount": send_amount})
+    assert transaction_response.status_code == 201
     get_response = client.get("/transactions", headers={'x-api-key': api_key})
 
     assert get_response.status_code == 200
-    assert get_response.json() == {'transactions': []} #jerjerobit ar maq daimplementirebuli
-
+    assert get_response.json() == {'transactions': [{"address_from": wallet_from,
+                                                     "address_to": wallet_to,
+                                                     "amount": send_amount}]}
 
