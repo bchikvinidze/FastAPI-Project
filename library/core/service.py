@@ -103,6 +103,15 @@ class Service:
 
         return transactions
 
+    def read_transactions_by_address(self, address: UUID):
+        transactions = []
+        from_list = self.repo.read_multi(address, 'transactions', 'address_from')
+        to_list = self.repo.read_multi(address, 'transactions', 'address_to')
+        for item in from_list + to_list:
+            transactions.append(
+                SerializerForDB().deserialize_transaction(item)
+            )
+        return transactions
 
 
 @dataclass

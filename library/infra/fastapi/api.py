@@ -164,3 +164,23 @@ def read_transactions(
             content={"error": {"message": msg}},
         )
 
+
+@api.get(
+    "/wallets/{address}/transactions", status_code=200, response_model=TransactionListEnvelope, tags=["transactions"]
+)
+def read_wallet_transactions(
+        address: UUID,
+        request: Request,
+        repo_dependable: RepositoryDependable
+) -> dict[str, list[Transaction]] | JSONResponse:
+    x_api_key = UUID(request.headers['x-api-key'])
+    try:
+        Authenticator(repo_dependable).authenticate(x_api_key)
+        transactions = Service(repo_dependable).read_transactions_by_address(address)
+        return {"transactions": transactions}
+    except ApiKeyWrong:
+        msg = ApiKeyWrong().msg()
+        return JSONResponse(
+            status_code=404,
+            content={"error": {"message": msg}},
+        )
