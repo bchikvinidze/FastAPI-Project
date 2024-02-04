@@ -155,7 +155,7 @@ def read_transactions(
     x_api_key = UUID(request.headers['x-api-key'])
     try:
         Authenticator(repo_dependable).authenticate(x_api_key)
-        transactions = Service(repo_dependable).read_multi(x_api_key, 'transactions', )
+        transactions = Service(repo_dependable).read_transactions(x_api_key)
         return {"transactions": transactions}
     except ApiKeyWrong:
         msg = ApiKeyWrong().msg()
@@ -164,5 +164,3 @@ def read_transactions(
             content={"error": {"message": msg}},
         )
 
-
-# p
