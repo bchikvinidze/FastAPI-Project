@@ -8,7 +8,7 @@ After running above command, write http://127.0.0.1:9000/docs in your browser to
 Bitcoin to USD API: https://www.blockchain.com/explorer/api/exchange_rates_api
 
 Things left to do:
-1) `GET /wallets/{address}/transactions`
+1) (DONE, WILL ADD SEPARATE TESTS) `GET /wallets/{address}/transactions`
 2) `GET /statistics`
 3) mypy fixes
 4) tests are all in 1 file, maybe redistribute to few files? I got 1 point deduction last time for this
