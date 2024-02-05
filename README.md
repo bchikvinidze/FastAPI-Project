@@ -11,7 +11,7 @@ Things left to do:
 1) (DONE, WILL ADD SEPARATE TESTS) `GET /wallets/{address}/transactions`
 2) `GET /statistics`
 3) mypy fixes
-4) tests are all in 1 file, maybe redistribute to few files? I got 1 point deduction last time for this
+4) (DONE) tests are all in 1 file, maybe redistribute to few files? I got 1 point deduction last time for this
 5) some tests are too heavy. find a way to make them shorter and easier to read
 6) Some errors are not informative: add input information in output messages, not just static message string.
 7) ~~Serialization is dargveving Single responsibility - think about how to solve this proble. (comment in the beginning of hw)~~
