@@ -10,63 +10,44 @@ Open-Closed Principle: SerializerForDB ცოტა არღვევს:
 
 from __future__ import annotations
 
-from typing import Protocol, Dict, List
+from re import T
+from typing import Dict, List, Type
 from uuid import UUID
 
+from dataclasses import dataclass, field
 from dacite import Config, from_dict
 
 import library.core.entities as entities
 
 
-class Serializer(Protocol):
-    def serialize(self, entity_type: str, input_data: entities.Entity) -> List[object]:
-        pass
+@dataclass()
+class Serializer:
+    columns: List[str] = field(default_factory=List["key", "address"])
+    class_data: Type[T] = field(default_factory=entities.Entity)
 
-    def deserialize(
-            self, entity_type: str, input_data: Dict[str, object]
-    ) -> entities.Entity | List[entities.Entity]:
-        pass
-
-
-class SerializerForDB:
-    @staticmethod
-    def serialize(
-           dt: entities.Entity, columns: List[str]
-    ) -> Dict[str, object]:
+    def serialize(self, dt: entities.Entity, columns: List[str]) -> Dict[str, object]:
         result = dt.__dict__
         result = {k: result[k] for k in columns}
         # db can't accept UUID, so converting to string
         for key in result.keys():
-            if ("key" in key) or ("address" in key):
+            if key in self.columns:
                 result[key] = str(result[key])
         return result
 
-    @staticmethod
-    def deserialize(
-            entity_type: str, input_data: Dict[str, object]
-    ) -> entities.Entity:
-        class_data = eval("entities." + entity_type.capitalize()[:-1])
+    def deserialize(self, input_data: Dict[str, object]) -> entities.Entity:
         result: entities.Entity = from_dict(
-            data_class=class_data,
+            data_class=self.class_data,
             data=input_data,
             config=Config(cast=[UUID]),
         )
         return result
 
-    @staticmethod
-    def deserialize_wallet(input_data: Dict[str, object]) -> entities.Wallet:
-        return from_dict(
-            data_class=entities.Wallet,
-            data=input_data,
-            config=Config(cast=[UUID]),
-        )
 
-    @staticmethod
-    def deserialize_transaction(
-            input_data: Dict[str, object]
-    ) -> entities.Transaction:
-        return from_dict(
-            data_class=entities.Transaction,
-            data=input_data,
-            config=Config(cast=[UUID]),
-        )
+@dataclass
+class SerializeWallet(Serializer):
+    class_data: Type[T] = field(default_factory=entities.Wallet)
+
+
+@dataclass
+class SerializeTransaction(Serializer):
+    class_data: Type[T] = field(default_factory=entities.Transaction)
