@@ -7,7 +7,7 @@ from library.core.entities import Entity
 from library.core.errors import (
     DoesNotExistError,
 )
-from library.core.serialization import Serializer
+from library.core.serialization import SerializerForDB
 
 
 class PersistentRepository:
@@ -50,7 +50,7 @@ class PersistentRepository:
                 + ", ".join([":" + i for i in self.tables[table_name]])
                 + ");"
         )
-        inputs = Serializer().serialize(
+        inputs = SerializerForDB().serialize(
             input_entity, self.tables[table_name]
         )
         self.cur.execute(execute_str, inputs)
