@@ -7,7 +7,7 @@ from library.core.entities import Entity
 from library.core.errors import (
     DoesNotExistError,
 )
-from library.core.serialization import SerializerForDB
+from library.core.serialization import Serializer
 
 
 class PersistentRepository:
