@@ -5,7 +5,7 @@ from uuid import UUID
 from constants import DB_NAME
 from library.core.entities import Entity
 from library.core.errors import DoesNotExistError
-from library.core.serialization import SerializerForDB
+from library.core.serialization import Serializer
 
 
 class PersistentRepository:
@@ -52,8 +52,8 @@ class PersistentRepository:
             + ", ".join([":" + i for i in self.tables[table_name]])
             + ");"
         )
-        inputs = SerializerForDB().serialize(
-            table_name, input_entity, self.tables[table_name]
+        inputs = Serializer().serialize(
+            input_entity, self.tables[table_name]
         )
         self.cur.execute(execute_str, inputs)
         self.con.commit()

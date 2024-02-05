@@ -10,8 +10,7 @@ Open-Closed Principle: SerializerForDB ცოტა არღვევს:
 
 from __future__ import annotations
 
-from re import T
-from typing import Dict, List, Type
+from typing import Dict, List, Type, cast, TypeVar, Generic, Protocol, Union, Any, Never
 from uuid import UUID
 
 from dataclasses import dataclass, field
@@ -19,11 +18,13 @@ from dacite import Config, from_dict
 
 import library.core.entities as entities
 
+T = TypeVar("T")
 
-@dataclass()
+
+@dataclass
 class Serializer:
-    columns: List[str] = field(default_factory=List["key", "address"])
-    class_data: Type[T] = field(default_factory=entities.Entity)
+    columns: List[str] = field(default_factory=lambda: ["key", "address"])
+    class_data: Any = field(default_factory=type(entities.Entity))
 
     def serialize(self, dt: entities.Entity, columns: List[str]) -> Dict[str, object]:
         result = dt.__dict__
@@ -45,9 +46,15 @@ class Serializer:
 
 @dataclass
 class SerializeWallet(Serializer):
-    class_data: Type[T] = field(default_factory=entities.Wallet)
+    class_data: Any = field(default_factory=type(entities.Wallet))
+
+    def deserialize(self, input_data: Dict[str, object]) -> entities.Wallet:
+        return cast(entities.Wallet, super().deserialize(input_data))
 
 
 @dataclass
 class SerializeTransaction(Serializer):
-    class_data: Type[T] = field(default_factory=entities.Transaction)
+    class_data: Any = field(default_factory=type(entities.Transaction))
+
+    def deserialize(self, input_data: Dict[str, object]) -> entities.Transaction:
+        return cast(entities.Transaction, super().deserialize(input_data))

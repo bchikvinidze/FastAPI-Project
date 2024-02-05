@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import List
+
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -12,7 +14,7 @@ from library.core.errors import (
     WalletAddressNotOwn,
     WalletLimitReached,
 )
-from library.core.serialization import SerializerForDB
+from library.core.serialization import Serializer, SerializeWallet, SerializeTransaction
 from library.infra.repository.repository import Repository
 
 
@@ -36,7 +38,7 @@ class Service:
         self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> float:
         res = self.repo.read_one(entity_id, table_name, column_name)
-        return SerializerForDB().deserialize_wallet(res).bitcoins
+        return SerializeWallet().deserialize(res).bitcoins
 
     def read(
         self, entity_id: UUID, table_name: str, column_name: str = "key"
@@ -45,8 +47,8 @@ class Service:
         if (
             table_name == "wallets"
         ):  # es dzaan sashinelebaa, if ar unda mchirdebodes wesit
-            return SerializerForDB().deserialize_wallet(res)
-        return SerializerForDB().deserialize(table_name, res)
+            return SerializeWallet().deserialize(res)
+        return Serializer().deserialize(res)
 
     def exists(
         self, entity_id: UUID, table_name: str, column_name: str = "key"
@@ -64,10 +66,10 @@ class Service:
         send_amount: float,
         x_api_key: UUID,
     ) -> None:
-        wallet_from = SerializerForDB().deserialize_wallet(
+        wallet_from = SerializeWallet().deserialize(
             self.repo.read_one(wallet_from_address, "wallets", "address")
         )
-        wallet_to = SerializerForDB().deserialize_wallet(
+        wallet_to = SerializeWallet().deserialize(
             self.repo.read_one(wallet_to_address, "wallets", "address")
         )
 
@@ -103,18 +105,18 @@ class Service:
 
     def read_multi(
         self, entity_id: UUID, table_name: str, column_name: str = "key"
-    ) -> list[Entity] | list[Wallet] | list[Transaction] | list[User]:
+    ) -> List[Entity] | List[Wallet] | List[Transaction] | List[User]:
         list_result = self.repo.read_multi(entity_id, table_name, column_name)
         deserialized = []
         for list_item in list_result:
-            deserialized.append(SerializerForDB().deserialize(table_name, list_item))
+            deserialized.append(Serializer().deserialize(list_item))
         return deserialized
 
-    def read_transactions(self, user_key: UUID) -> list[Transaction]:
+    def read_transactions(self, user_key: UUID) -> List[Transaction]:
         user_wallets = self.repo.read_multi(user_key, "wallets")
         transactions = []
         for wallet_raw in user_wallets:
-            wallet_item = SerializerForDB().deserialize_wallet(wallet_raw)
+            wallet_item = SerializeWallet().deserialize(wallet_raw)
 
             # get transactions where amount was sent from given address.
             list_result = self.repo.read_multi(
@@ -122,7 +124,7 @@ class Service:
             )
             for list_item in list_result:
                 transactions.append(
-                    SerializerForDB().deserialize_transaction(list_item)
+                    SerializeTransaction().deserialize(input_data=list_item)
                 )
 
         return transactions
