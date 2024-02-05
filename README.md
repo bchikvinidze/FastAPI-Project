@@ -19,3 +19,4 @@ Things left to do:
 9) Service.py-shi Service class could be decomposed into multiple smaller classes and we will have better S from SOLID. : In Progress
 10) proeqtis README-s dawera - ra failshi ra xdeba.
 11) (DONE) test_transactions_get- es dasaweria da shesabamisad cvlilebebi transactionis get-stvis Service class-shi. 
+12) test transaction from own to another wallet(fee is correct)

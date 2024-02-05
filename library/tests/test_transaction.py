@@ -148,9 +148,9 @@ def test_transactions_get(client: TestClient) -> None:
     # test for get /wallets/{address}/transactions
     # will write separately & expand later
     from_resp = client.get(f'/wallets/{wallet_from}/transactions',
-                                       headers={'x-api-key': api_key},)
+                           headers={'x-api-key': api_key}, )
     to_resp = client.get(f'/wallets/{wallet_to}/transactions',
-                                       headers={'x-api-key': api_key},)
+                         headers={'x-api-key': api_key}, )
     assert to_resp.json() == get_response.json()
     assert from_resp.json() == get_response.json()
     assert from_resp.status_code == 200

@@ -8,8 +8,6 @@ from uuid import UUID
 from constants import TRANSACTION_FEE, WALLET_CNT_LIMIT
 from library.core.entities import Entity, Transaction, User, Wallet
 from library.core.errors import (
-    ApiKeyWrong,
-    DoesNotExistError,
     SendAmountExceedsBalance,
     WalletAddressNotOwn,
     WalletLimitReached,
@@ -142,12 +140,3 @@ class Service:
         return transactions
 
 
-@dataclass
-class Authenticator:
-    repo: Repository
-
-    def authenticate(self, api_key: UUID) -> None:
-        try:
-            res = self.repo.read_one(api_key, "users", "key")
-        except DoesNotExistError:
-            raise ApiKeyWrong
