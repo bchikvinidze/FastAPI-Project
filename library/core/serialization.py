@@ -24,37 +24,52 @@ T = TypeVar("T")
 @dataclass
 class Serializer:
     columns: List[str] = field(default_factory=lambda: ["key", "address"])
-    class_data: Any = field(default_factory=type(entities.Entity))
 
     def serialize(self, dt: entities.Entity, columns: List[str]) -> Dict[str, object]:
         result = dt.__dict__
         result = {k: result[k] for k in columns}
         # db can't accept UUID, so converting to string
         for key in result.keys():
-            if key in self.columns:
+            if self.columns[0] in key or self.columns[1] in key:
                 result[key] = str(result[key])
         return result
 
     def deserialize(self, input_data: Dict[str, object]) -> entities.Entity:
-        result: entities.Entity = from_dict(
-            data_class=self.class_data,
+        return from_dict(
+            data_class=entities.Entity,
             data=input_data,
             config=Config(cast=[UUID]),
         )
-        return result
 
 
 @dataclass
 class SerializeWallet(Serializer):
-    class_data: Any = field(default_factory=type(entities.Wallet))
 
     def deserialize(self, input_data: Dict[str, object]) -> entities.Wallet:
-        return cast(entities.Wallet, super().deserialize(input_data))
+        return from_dict(
+            data_class=entities.Wallet,
+            data=input_data,
+            config=Config(cast=[UUID]),
+        )
 
 
 @dataclass
 class SerializeTransaction(Serializer):
-    class_data: Any = field(default_factory=type(entities.Transaction))
 
     def deserialize(self, input_data: Dict[str, object]) -> entities.Transaction:
-        return cast(entities.Transaction, super().deserialize(input_data))
+        return from_dict(
+            data_class=entities.Transaction,
+            data=input_data,
+            config=Config(cast=[UUID]),
+        )
+
+
+@dataclass
+class SerializeUser(Serializer):
+
+    def deserialize(self, input_data: Dict[str, object]) -> entities.User:
+        return from_dict(
+            data_class=entities.User,
+            data=input_data,
+            config=Config(cast=[UUID]),
+        )
