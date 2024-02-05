@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import Protocol, Any, List, Dict
 from uuid import UUID
 
-from library.core.entities import Entity
+from library.core.entities import IEntity
 
 
 class Repository(Protocol):
 
     def create(
-        self, input_entity: Entity, table_name: str
+        self, input_entity: IEntity, table_name: str
     ) -> None:
         pass
 
