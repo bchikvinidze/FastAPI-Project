@@ -10,7 +10,7 @@ Open-Closed Principle: SerializerForDB ცოტა არღვევს:
 
 from __future__ import annotations
 
-from typing import Dict, List, Type, cast, TypeVar, Generic, Protocol, Union, Any, Never
+from typing import Dict, List, TypeVar
 from uuid import UUID
 
 from dataclasses import dataclass, field

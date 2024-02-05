@@ -9,7 +9,8 @@ from library.core.bitcoin_converter import BitcoinToCurrency
 from library.core.entities import User, Wallet, UsdWallet, Entity, Transaction
 from library.core.errors import WebException
 from library.core.service import Service, Authenticator
-from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope, WalletItemEnvelope, \
+from library.infra.fastapi.base_models import UserItemEnvelope, \
+    UsdWalletItemEnvelope, WalletItemEnvelope, \
     TransactionItem, TransactionListEnvelope
 from library.infra.fastapi.dependables import RepositoryDependable
 

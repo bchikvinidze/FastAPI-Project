@@ -35,23 +35,23 @@ class Service:
         self.repo.create(input_entity, "wallets")
 
     def read_wallet_bitcoins(
-        self, entity_id: UUID, table_name: str, column_name: str = "key"
+            self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> float:
         res = self.repo.read_one(entity_id, table_name, column_name)
         return SerializeWallet().deserialize(res).bitcoins
 
     def read(
-        self, entity_id: UUID, table_name: str, column_name: str = "key"
+            self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> User | Wallet | Entity:
         res = self.repo.read_one(entity_id, table_name, column_name)
         if (
-            table_name == "wallets"
+                table_name == "wallets"
         ):  # es dzaan sashinelebaa, if ar unda mchirdebodes wesit
             return SerializeWallet().deserialize(res)
         return SerializeUser().deserialize(res)
 
     def exists(
-        self, entity_id: UUID, table_name: str, column_name: str = "key"
+            self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> bool:
         res = self.repo.read_one(entity_id, table_name, column_name)
         if len(res) == 0:
@@ -60,11 +60,11 @@ class Service:
 
     # egreve transaction klass s ver gadavce tore SOLID-is I dairgveva mgoni.
     def transfer(
-        self,
-        wallet_from_address: UUID,
-        wallet_to_address: UUID,
-        send_amount: float,
-        x_api_key: UUID,
+            self,
+            wallet_from_address: UUID,
+            wallet_to_address: UUID,
+            send_amount: float,
+            x_api_key: UUID,
     ) -> None:
         wallet_from = SerializeWallet().deserialize(
             self.repo.read_one(wallet_from_address, "wallets", "address")
@@ -104,7 +104,7 @@ class Service:
         self.create(transaction, "transactions")
 
     def read_multi(
-        self, entity_id: UUID, table_name: str, column_name: str = "key"
+            self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> List[Entity] | List[Wallet] | List[Transaction] | List[User]:
         list_result = self.repo.read_multi(entity_id, table_name, column_name)
         deserialized = []
@@ -136,7 +136,7 @@ class Service:
         for item in from_list + to_list:
             transactions.append(
                 # old version
-                #SerializerForDB().deserialize_transaction(item)
+                # SerializerForDB().deserialize_transaction(item)
                 SerializeTransaction().deserialize(input_data=item)
             )
         return transactions
