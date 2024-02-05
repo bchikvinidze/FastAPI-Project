@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from constants import TRANSACTION_FEE, WALLET_CNT_LIMIT
-from library.core.entities import Entity, Transaction, User, Wallet
+from library.core.entities import Transaction, User, Wallet, IEntity
 from library.core.errors import (
     ApiKeyWrong,
     DoesNotExistError,
@@ -14,24 +14,26 @@ from library.core.errors import (
     WalletAddressNotOwn,
     WalletLimitReached,
 )
-from library.core.serialization import Serializer, SerializeWallet, SerializeTransaction, SerializeUser
+from library.core.serialization import Serializer, \
+    SerializeWallet, SerializeTransaction, SerializeUser
 from library.infra.repository.repository import Repository
 
 
-# drota ganmavlobashi chasashlelia ramdenime servisad (tore single responsibilitys argvevs dzaaaan)
+# drota ganmavlobashi chasashlelia ramdenime
+# servisad (tore single responsibilitys argvevs dzaaaan)
 # wallets tavisi eqneba, trannazqciebs - tavisi da a.sh
 @dataclass
 class Service:
     repo: Repository
 
-    def create(self, input_entity: Entity, table_name: str) -> None:
+    def create(self, input_entity: IEntity, table_name: str) -> None:
         self.repo.create(input_entity, table_name)
 
     def create_wallet(self, wallet: Wallet) -> None:
         wallet_count = len(self.repo.read_multi(wallet.user_key, "wallets"))
         if wallet_count >= WALLET_CNT_LIMIT:
             raise WalletLimitReached
-        input_entity: Entity = wallet
+        input_entity: IEntity = wallet
         self.repo.create(input_entity, "wallets")
 
     def read_wallet_bitcoins(
@@ -42,7 +44,7 @@ class Service:
 
     def read(
             self, entity_id: UUID, table_name: str, column_name: str = "key"
-    ) -> User | Wallet | Entity:
+    ) -> User | Wallet | IEntity:
         res = self.repo.read_one(entity_id, table_name, column_name)
         if (
                 table_name == "wallets"
@@ -105,7 +107,7 @@ class Service:
 
     def read_multi(
             self, entity_id: UUID, table_name: str, column_name: str = "key"
-    ) -> List[Entity] | List[Wallet] | List[Transaction] | List[User]:
+    ) -> List[IEntity] | List[Wallet] | List[Transaction] | List[User]:
         list_result = self.repo.read_multi(entity_id, table_name, column_name)
         deserialized = []
         for list_item in list_result:

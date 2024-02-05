@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Tuple
 from uuid import UUID
 
 from constants import DB_NAME
-from library.core.entities import Entity
+from library.core.entities import IEntity
 from library.core.errors import (
     DoesNotExistError,
 )
@@ -47,13 +47,14 @@ class PersistentRepository:
         return d
 
     def create(
-        self, input_entity: Entity, table_name: str
+        self, input_entity: IEntity, table_name: str
     ) -> None:
-        execute_str = (
+        execute_str = \
+            (
                 "INSERT INTO {} VALUES(".format(table_name)
                 + ", ".join([":" + i for i in self.tables[table_name]])
                 + ");"
-        )
+            )
         inputs = Serializer().serialize(
             input_entity, self.tables[table_name]
         )

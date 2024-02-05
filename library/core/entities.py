@@ -16,17 +16,17 @@ class IEntity(Protocol):
 
 
 @dataclass(kw_only=True)
-class Entity:
+class Entity(IEntity):
     key: UUID = field(default_factory=uuid4)
 
 
 @dataclass(kw_only=True)
-class User:
+class User(IEntity):
     key: UUID = field(default_factory=uuid4)
 
 
 @dataclass(kw_only=True)
-class Wallet:
+class Wallet(IEntity):
     user_key: UUID
     bitcoins: float = INITIAL_BITCOINS
     address: UUID = field(default_factory=uuid4)
@@ -34,14 +34,15 @@ class Wallet:
 
 
 @dataclass(kw_only=True)
-class UsdWallet:
+class UsdWallet(IEntity):
     wallet_address: UUID
     bitcoins_balance: float
     usd_balance: float
+    key: UUID = field(default_factory=uuid4)
 
 
 @dataclass(kw_only=True)
-class Transaction:
+class Transaction(IEntity):
     address_from: UUID
     address_to: UUID
     amount: float
