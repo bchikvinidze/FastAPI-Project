@@ -1,17 +1,19 @@
 from __future__ import annotations
 
+from typing import Dict
 from uuid import UUID
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+from starlette.responses import JSONResponse
 
 from library.core.bitcoin_converter import BitcoinToCurrency
-from library.core.entities import User, Wallet, UsdWallet, Entity, Transaction
+from library.core.entities import User, Wallet, UsdWallet, Entity, Transaction, Statistic
 from library.core.errors import WebException
 from library.core.service import Service
-from library.core.authenticate import UserAuthenticator
+from library.core.authenticate import UserAuthenticator, AdminAuthenticator
 from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope, WalletItemEnvelope, \
-    TransactionItem, TransactionListEnvelope
+    TransactionItem, TransactionListEnvelope, StatisticsItem, StatisticsItemEnvelope
 from library.infra.fastapi.dependables import RepositoryDependable
 
 api = APIRouter()
@@ -156,19 +158,19 @@ def read_wallet_transactions(
     # except ApiKeyWrong:
     #     return ApiKeyWrong().json_response()
 
+
 @api.get(
-    "/statistics", status_code=200
+    "/statistics", status_code=200, response_model=StatisticsItemEnvelope, tags=["statistics"]
 )
 def get_statistics(
         request: Request,
         repo_dependable: RepositoryDependable
-) -> dict[str, list[Transaction]] | JSONResponse:
+) -> dict[str, Statistic] | JSONResponse:
     x_api_key = UUID(request.headers['x-api-key'])
     try:
-        UserAuthenticator(repo_dependable).authenticate(x_api_key)
-        transactions = Service(repo_dependable).read_transactions_by_address(address)
-        return {"transactions": transactions}
+        AdminAuthenticator().authenticate(x_api_key)
+        curr_statistics = Service(repo_dependable).get_statistics()
+        print("aaa", curr_statistics)
+        return {"statistics": curr_statistics}
     except WebException as we:
         return we.json_response()
-    # except ApiKeyWrong:
-    #     return ApiKeyWrong().json_response()

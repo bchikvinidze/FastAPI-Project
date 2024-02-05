@@ -1,5 +1,7 @@
 from starlette.testclient import TestClient
 
+from constants import ADMIN_API_KEY
+
 
 def test_statistics(client: TestClient) -> None:
     # create user and wallets
@@ -26,18 +28,14 @@ def test_statistics(client: TestClient) -> None:
                                              "address_to": wallet_to,
                                              "amount": send_amount})
 
-    response = client.get("/statistics")
-    transaction_number = response.json()['count_transactions']
-    platform_profit = response.json()['total_profit']
-    # # observe post-transaction balances:
-    # wallet_from_response = client.get(f"/wallets/{wallet_from}", headers={'x-api-key': api_key})
-    # bitcoin_from_final = wallet_from_response.json()['bitcoins']
-    # wallet_to_response = client.get(f"/wallets/{wallet_to}", headers={'x-api-key': api_key})
-    # bitcoin_to_final = wallet_to_response.json()['bitcoins']
+    statistics_response = client.get("/statistics", headers={'x-api-key': ADMIN_API_KEY})
+    print("here", statistics_response.json())
+    # transaction_number = statistics_response.json()['count_transactions']
+    # platform_profit = statistics_response.json()['total_profit']
 
     assert transaction_response.status_code == 201
     assert transaction_response.json() == {}
-    # assert wallet_from_response.status_code == 200
-    # assert wallet_to_response.status_code == 200
-    # assert bitcoin_from_final == bitcoin_from_initial - send_amount
-    # assert bitcoin_to_final == bitcoin_to_initial + send_amount
+    assert statistics_response.status_code == 200
+    # assert 'x-api-key' in statistics_response.request.headers
+    # assert transaction_number == 1
+    # assert platform_profit == 0.015

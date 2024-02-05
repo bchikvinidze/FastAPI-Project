@@ -3,7 +3,6 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-
 # Requests:
 
 
@@ -28,13 +27,23 @@ class TransactionItem(BaseModel):
     address_from: UUID
     address_to: UUID
     amount: float
-    #fee_amount: float
-    #key: UUID
+    # fee_amount: float
+    # key: UUID
+
+
+class StatisticsItem(BaseModel):
+    count_transactions: int
+    total_profit: float
+    # key: UUID
 
 
 # Envelopes for item
 class UserItemEnvelope(BaseModel):
     user: UserItem
+
+
+class StatisticsItemEnvelope(BaseModel):
+    stat: StatisticsItem
 
 
 class UsdWalletItemEnvelope(BaseModel):

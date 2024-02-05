@@ -5,7 +5,7 @@ from uuid import UUID
 from constants import DB_NAME
 from library.core.entities import Entity
 from library.core.errors import (
-    DoesNotExistError,
+    DoesNotExistError, DoesNotExistErrorTable,
 )
 from library.core.serialization import Serializer
 
@@ -88,6 +88,21 @@ class PersistentRepository:
             raise DoesNotExistError(table_name, column_name, str(entity_id))
         except TypeError:
             raise DoesNotExistError(table_name, column_name, str(entity_id))
+
+    def read_all(
+        self, table_name: str
+    ) -> List[Dict[str, object]]:
+        try:
+            str_to_execute = f"SELECT * FROM {table_name}"
+            cursor = self.cur.execute(str_to_execute)
+            result = []
+            for row in cursor:
+                result.append(row)
+            return result
+        except KeyError:
+            raise DoesNotExistErrorTable(table_name)
+        except TypeError:
+            raise DoesNotExistErrorTable(table_name)
 
     def update(self, entity_id: UUID, column_name: str, table_name: str, changes: Dict[str, Any]) -> None:
         try:
