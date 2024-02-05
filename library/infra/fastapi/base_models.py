@@ -2,7 +2,6 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-#from library.core.entities import Purchase
 
 
 # Requests:

@@ -1,6 +1,5 @@
 from unittest.mock import ANY
 
-import pytest
 from fastapi.testclient import TestClient
 from library.core.bitcoin_converter import BitcoinToCurrency
 

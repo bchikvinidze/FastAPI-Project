@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Header, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from library.core.bitcoin_converter import BitcoinToCurrency
 from library.core.entities import User, Wallet, UsdWallet, Entity, Transaction
-from library.core.errors import DoesNotExistError, WalletLimitReached, ApiKeyWrong, WalletAddressNotOwn, \
-    SendAmountExceedsBalance, WebException
+from library.core.errors import WebException
 from library.core.service import Service, Authenticator
 from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope, WalletItemEnvelope, \
     TransactionItem, TransactionListEnvelope

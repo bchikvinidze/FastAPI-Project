@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Protocol, TypeVar
+from typing import Protocol
 from uuid import UUID, uuid4
 
 from constants import INITIAL_BITCOINS

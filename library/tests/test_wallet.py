@@ -1,16 +1,9 @@
-import os
-from random import choice
-
-from string import ascii_uppercase
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pytest
 from fastapi.testclient import TestClient
 
 from constants import WALLET_CNT_LIMIT
-from library.core.bitcoin_converter import BitcoinToCurrency
-from library.core.entities import Transaction
 
 
 def test_wallet_create(client: TestClient) -> None:
