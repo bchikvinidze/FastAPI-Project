@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from library.core.bitcoin_converter import BitcoinToCurrency
 from library.core.entities import User, Wallet, UsdWallet, Entity, Transaction
 from library.core.errors import DoesNotExistError, WalletLimitReached, ApiKeyWrong, WalletAddressNotOwn, \
-    SendAmountExceedsBalance
+    SendAmountExceedsBalance, WebException
 from library.core.service import Service, Authenticator
 from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope, WalletItemEnvelope, \
     TransactionItem, TransactionListEnvelope
@@ -40,10 +40,10 @@ def create_wallet(
                                bitcoins_balance=wallet.bitcoins,
                                usd_balance=usd)
         return {"usd_wallet": usd_wallet}
-    except WalletLimitReached:
-        return WalletLimitReached().json_response()
-    except ApiKeyWrong:
-        return ApiKeyWrong().json_response()
+    except WebException as we:
+        return we.json_response()
+    # except ApiKeyWrong:
+    #     return ApiKeyWrong().json_response()
 
 
 # es shesacvlelia: query parameters ar unda iyos rogorc gavige. request-shi unda iyos es wallet from, to da amount.
@@ -64,12 +64,14 @@ def create_transaction(
         send_amount = transaction['amount']
         Service(repo_dependable).transfer(wallet_from, wallet_to, send_amount, x_api_key)
         return JSONResponse(status_code=201, content={})
-    except ApiKeyWrong as e:
-        return ApiKeyWrong().json_response()
-    except WalletAddressNotOwn:
-        return WalletAddressNotOwn().json_response()
-    except SendAmountExceedsBalance:
-        return SendAmountExceedsBalance().json_response()
+    except WebException as we:
+        return we.json_response()
+    # except ApiKeyWrong as e:
+    #     return ApiKeyWrong().json_response()
+    # except WalletAddressNotOwn:
+    #     return WalletAddressNotOwn().json_response()
+    # except SendAmountExceedsBalance:
+    #     return SendAmountExceedsBalance().json_response()
 
 
 @api.get(
@@ -84,12 +86,14 @@ def read_one_user(
     try:
         Authenticator(repo_dependable).authenticate(UUID(x_api_key))
         return {"user": Service(repo_dependable).read(user_key, "users")}
-    except DoesNotExistError:
-        return DoesNotExistError(
-            "User", "key", str(user_key)
-        ).json_response()
-    except ApiKeyWrong:
-        return ApiKeyWrong().json_response()
+    except WebException as we:
+        return we.json_response()
+    # except DoesNotExistError:
+    #     return DoesNotExistError(
+    #         "User", "key", str(user_key)
+    #     ).json_response()
+    # except ApiKeyWrong:
+    #     return ApiKeyWrong().json_response()
 
 
 @api.get(
@@ -105,12 +109,14 @@ def read_wallet_address(
         Authenticator(repo_dependable).authenticate(UUID(x_api_key))
         bitcoins = Service(repo_dependable).read_wallet_bitcoins(address, 'wallets', 'address')
         return {"wallet_address": address, 'bitcoins': bitcoins, 'usd': BitcoinToCurrency().convert(bitcoins)}
-    except DoesNotExistError:
-        return DoesNotExistError(
-            "Wallet", "address", str(address)
-        ).json_response()
-    except ApiKeyWrong:
-        return ApiKeyWrong.json_response()
+    except WebException as we:
+        return we.json_response()
+    # except DoesNotExistError:
+    #     return DoesNotExistError(
+    #         "Wallet", "address", str(address)
+    #     ).json_response()
+    # except ApiKeyWrong:
+    #     return ApiKeyWrong.json_response()
 
 
 @api.get(
@@ -125,8 +131,10 @@ def read_transactions(
         Authenticator(repo_dependable).authenticate(x_api_key)
         transactions = Service(repo_dependable).read_transactions(x_api_key)
         return {"transactions": transactions}
-    except ApiKeyWrong:
-        return ApiKeyWrong().json_response()
+    except WebException as we:
+        return we.json_response()
+    # except ApiKeyWrong:
+    #     return ApiKeyWrong().json_response()
 
 
 @api.get(
@@ -142,5 +150,7 @@ def read_wallet_transactions(
         Authenticator(repo_dependable).authenticate(x_api_key)
         transactions = Service(repo_dependable).read_transactions_by_address(address)
         return {"transactions": transactions}
-    except ApiKeyWrong:
-        return ApiKeyWrong().json_response()
+    except WebException as we:
+        return we.json_response()
+    # except ApiKeyWrong:
+    #     return ApiKeyWrong().json_response()
