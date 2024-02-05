@@ -65,12 +65,12 @@ class PersistentRepository:
             )
             fetch: dict[str, object] = self.cur.execute(str_to_execute).fetchone()
             if len(fetch) == 0:
-                raise DoesNotExistError(entity_id)
+                raise DoesNotExistError(table_name, column_name, str(entity_id))
             return fetch
         except KeyError:
-            raise DoesNotExistError(entity_id)
+            raise DoesNotExistError(table_name, column_name, str(entity_id))
         except TypeError:
-            raise DoesNotExistError(entity_id)
+            raise DoesNotExistError(table_name, column_name, str(entity_id))
 
     def read_multi(
         self, entity_id: UUID, table_name: str, column_name: str = "USER_KEY"
@@ -85,9 +85,9 @@ class PersistentRepository:
                 result.append(row)
             return result
         except KeyError:
-            raise DoesNotExistError(entity_id)
+            raise DoesNotExistError(table_name, column_name, str(entity_id))
         except TypeError:
-            raise DoesNotExistError(entity_id)
+            raise DoesNotExistError(table_name, column_name, str(entity_id))
 
     def update(self, entity_id: UUID, column_name: str, table_name: str, changes: dict[str, Any]) -> None:
         try:
@@ -109,7 +109,7 @@ class PersistentRepository:
             self.cur.execute(sql_query)
             self.con.commit()
         except KeyError:
-            raise DoesNotExistError(entity_id)
+            raise DoesNotExistError(table_name, column_name, str(entity_id))
 
     def drop_all(self) -> None:
         for table in self.tables.keys():

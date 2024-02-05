@@ -18,7 +18,7 @@ api = APIRouter()
 
 @api.post("/users", status_code=201, response_model=UserItemEnvelope, tags=["Users"])
 def create_user(
-    repo_dependable: RepositoryDependable
+        repo_dependable: RepositoryDependable
 ) -> dict[str, User]:
     new_user = User()
     Service(repo_dependable).create(new_user, "users")
@@ -27,8 +27,8 @@ def create_user(
 
 @api.post("/wallets", status_code=201, response_model=UsdWalletItemEnvelope, tags=["Wallets"])
 def create_wallet(
-    request: Request,
-    repo_dependable: RepositoryDependable
+        request: Request,
+        repo_dependable: RepositoryDependable
 ) -> dict[str, UsdWallet] | JSONResponse:
     x_api_key = UUID(request.headers['x-api-key'])
     try:
@@ -41,17 +41,9 @@ def create_wallet(
                                usd_balance=usd)
         return {"usd_wallet": usd_wallet}
     except WalletLimitReached:
-        msg = WalletLimitReached().msg()
-        return JSONResponse(
-            status_code=409,
-            content={"error": {"message": msg}},
-        )
+        return WalletLimitReached().json_response()
     except ApiKeyWrong:
-        msg = ApiKeyWrong().msg()
-        return JSONResponse(
-            status_code=404,
-            content={"error": {"message": msg}},
-        )
+        return ApiKeyWrong().json_response()
 
 
 # es shesacvlelia: query parameters ar unda iyos rogorc gavige. request-shi unda iyos es wallet from, to da amount.
@@ -60,9 +52,9 @@ def create_wallet(
           response_model=TransactionItem,
           tags=["Transactions"])
 def create_transaction(
-    transaction: dict[str, UUID | float],
-    request: Request,
-    repo_dependable: RepositoryDependable
+        transaction: dict[str, UUID | float],
+        request: Request,
+        repo_dependable: RepositoryDependable
 ) -> JSONResponse:
     x_api_key = UUID(request.headers['x-api-key'])
     try:
@@ -72,59 +64,41 @@ def create_transaction(
         send_amount = transaction['amount']
         Service(repo_dependable).transfer(wallet_from, wallet_to, send_amount, x_api_key)
         return JSONResponse(status_code=201, content={})
-    except ApiKeyWrong:
-        msg = ApiKeyWrong().msg()
-        return JSONResponse(
-            status_code=404,
-            content={"error": {"message": msg}},
-        )
+    except ApiKeyWrong as e:
+        return ApiKeyWrong().json_response()
     except WalletAddressNotOwn:
-        msg = WalletAddressNotOwn().msg()
-        return JSONResponse(
-            status_code=403,
-            content={"error": {"message": msg}},
-        )
+        return WalletAddressNotOwn().json_response()
     except SendAmountExceedsBalance:
-        msg = SendAmountExceedsBalance().msg()
-        return JSONResponse(
-            status_code=403,
-            content={"error": {"message": msg}},
-        )
+        return SendAmountExceedsBalance().json_response()
 
 
 @api.get(
     "/users/{user_key}/", status_code=200, response_model=UserItemEnvelope, tags=["Users"]
 )
 def read_one_user(
-    user_key: UUID,
-    request: Request,
-    repo_dependable: RepositoryDependable
+        user_key: UUID,
+        request: Request,
+        repo_dependable: RepositoryDependable
 ) -> dict[str, Entity] | JSONResponse:
     x_api_key = request.headers['x-api-key']
     try:
         Authenticator(repo_dependable).authenticate(UUID(x_api_key))
         return {"user": Service(repo_dependable).read(user_key, "users")}
     except DoesNotExistError:
-        msg = DoesNotExistError().msg("User", "key", str(user_key))
-        return JSONResponse(
-            status_code=404,
-            content={"error": {"message": msg}},
-        )
+        return DoesNotExistError(
+            "User", "key", str(user_key)
+        ).json_response()
     except ApiKeyWrong:
-        msg = ApiKeyWrong().msg()
-        return JSONResponse(
-            status_code=404,
-            content={"error": {"message": msg}},
-        )
+        return ApiKeyWrong().json_response()
 
 
 @api.get(
     "/wallets/{address}/", status_code=200, response_model=WalletItemEnvelope, tags=["Wallets"]
 )
 def read_wallet_address(
-    address: UUID,
-    request: Request,
-    repo_dependable: RepositoryDependable
+        address: UUID,
+        request: Request,
+        repo_dependable: RepositoryDependable
 ) -> dict[str, UUID | float] | JSONResponse:
     x_api_key = request.headers['x-api-key']
     try:
@@ -132,25 +106,19 @@ def read_wallet_address(
         bitcoins = Service(repo_dependable).read_wallet_bitcoins(address, 'wallets', 'address')
         return {"wallet_address": address, 'bitcoins': bitcoins, 'usd': BitcoinToCurrency().convert(bitcoins)}
     except DoesNotExistError:
-        msg = DoesNotExistError().msg("Wallet", "address", str(address))
-        return JSONResponse(
-            status_code=404,
-            content={"error": {"message": msg}},
-        )
+        return DoesNotExistError(
+            "Wallet", "address", str(address)
+        ).json_response()
     except ApiKeyWrong:
-        msg = ApiKeyWrong().msg()
-        return JSONResponse(
-            status_code=404,
-            content={"error": {"message": msg}},
-        )
+        return ApiKeyWrong.json_response()
 
 
 @api.get(
     "/transactions", status_code=200, response_model=TransactionListEnvelope, tags=["transactions"]
 )
 def read_transactions(
-    request: Request,
-    repo_dependable: RepositoryDependable
+        request: Request,
+        repo_dependable: RepositoryDependable
 ) -> dict[str, list[Transaction]] | JSONResponse:
     x_api_key = UUID(request.headers['x-api-key'])
     try:
@@ -158,11 +126,7 @@ def read_transactions(
         transactions = Service(repo_dependable).read_transactions(x_api_key)
         return {"transactions": transactions}
     except ApiKeyWrong:
-        msg = ApiKeyWrong().msg()
-        return JSONResponse(
-            status_code=404,
-            content={"error": {"message": msg}},
-        )
+        return ApiKeyWrong().json_response()
 
 
 @api.get(
@@ -179,8 +143,4 @@ def read_wallet_transactions(
         transactions = Service(repo_dependable).read_transactions_by_address(address)
         return {"transactions": transactions}
     except ApiKeyWrong:
-        msg = ApiKeyWrong().msg()
-        return JSONResponse(
-            status_code=404,
-            content={"error": {"message": msg}},
-        )
+        return ApiKeyWrong().json_response()
