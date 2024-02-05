@@ -14,7 +14,7 @@ from library.core.errors import (
     WalletAddressNotOwn,
     WalletLimitReached,
 )
-from library.core.serialization import Serializer, SerializeWallet, SerializeTransaction
+from library.core.serialization import Serializer, SerializeWallet, SerializeTransaction, SerializeUser
 from library.infra.repository.repository import Repository
 
 
@@ -48,7 +48,7 @@ class Service:
             table_name == "wallets"
         ):  # es dzaan sashinelebaa, if ar unda mchirdebodes wesit
             return SerializeWallet().deserialize(res)
-        return Serializer().deserialize(res)
+        return SerializeUser().deserialize(res)
 
     def exists(
         self, entity_id: UUID, table_name: str, column_name: str = "key"
