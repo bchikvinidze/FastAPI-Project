@@ -21,12 +21,12 @@ def test_wallet_create(client: TestClient) -> None:
 def test_wallet_create_over_limit(client: TestClient) -> None:
     response = client.post("/users")
     api_key = response.json()["user"]["key"]
-
+    expected_msg = "wallet limit reached. Can't create any new wallets."
     for i in range(0, WALLET_CNT_LIMIT + 1):
         response = client.post("/wallets", headers={'x-api-key': api_key})
 
     assert response.status_code == 409
-    assert response.json() == {'error': {'message': "wallet limit reached. Can't create any new wallets."}}
+    assert response.json() == {'error': {'message': expected_msg}}
 
 
 def test_wallet_unknown_key(client: TestClient) -> None:

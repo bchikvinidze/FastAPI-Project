@@ -23,5 +23,6 @@ class Repository(Protocol):
     ) -> List[Dict[str, object]]:
         pass
 
-    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: Dict[str, Any]) -> None:
+    def update(self, entity_id: UUID, column_name: str,
+               table_name: str, changes: Dict[str, Any]) -> None:
         pass

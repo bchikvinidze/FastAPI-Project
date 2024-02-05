@@ -19,7 +19,11 @@ class PersistentRepository:
         self.tables = {
             "users": ["key"],
             "wallets": ["address", "bitcoins", "user_key", "key"],
-            "transactions": ["address_from", "address_to", "amount", "fee_amount", "key"]
+            "transactions": ["address_from",
+                             "address_to",
+                             "amount",
+                             "fee_amount",
+                             "key"]
         }
 
         for table in self.tables.keys():
@@ -89,9 +93,11 @@ class PersistentRepository:
         except TypeError:
             raise DoesNotExistError(table_name, column_name, str(entity_id))
 
-    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: Dict[str, Any]) -> None:
+    def update(self, entity_id: UUID,
+               column_name: str, table_name: str,
+               changes: Dict[str, Any]) -> None:
         try:
-            self.read_one(entity_id, table_name, column_name)  # will throw exception if needed
+            self.read_one(entity_id, table_name, column_name)
             set_sql = ", ".join(
                 [
                     "{}={}".format(
@@ -114,4 +120,3 @@ class PersistentRepository:
     def drop_all(self) -> None:
         for table in self.tables.keys():
             self.cur.execute("DROP TABLE " + table)
-            

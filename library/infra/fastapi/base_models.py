@@ -1,7 +1,7 @@
+from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel
-
 
 
 # Requests:
@@ -28,8 +28,8 @@ class TransactionItem(BaseModel):
     address_from: UUID
     address_to: UUID
     amount: float
-    #fee_amount: float
-    #key: UUID
+    # fee_amount: float
+    # key: UUID
 
 
 # Envelopes for item
@@ -49,4 +49,4 @@ class WalletItemEnvelope(BaseModel):
 
 # Envelopes for list
 class TransactionListEnvelope(BaseModel):
-    transactions: list[TransactionItem]
+    transactions: List[TransactionItem]

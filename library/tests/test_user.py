@@ -27,5 +27,3 @@ def test_bitcoin_to_usd_api(client: TestClient) -> None:
     usd = converter.convert(10)
 
     assert usd > 0
-
-
