@@ -129,7 +129,7 @@ class Service:
 
         return transactions
 
-    def read_transactions_by_address(self, address: UUID):
+    def read_transactions_by_address(self, address: UUID) -> List[Transaction]:
         transactions = []
         from_list = self.repo.read_multi(address, 'transactions', 'address_from')
         to_list = self.repo.read_multi(address, 'transactions', 'address_to')
