@@ -4,9 +4,7 @@ from uuid import UUID
 
 from constants import DB_NAME
 from library.core.entities import Entity
-from library.core.errors import (
-    DoesNotExistError,
-)
+from library.core.errors import DoesNotExistError
 from library.core.serialization import SerializerForDB
 
 
@@ -19,7 +17,13 @@ class PersistentRepository:
         self.tables = {
             "users": ["key"],
             "wallets": ["address", "bitcoins", "user_key", "key"],
-            "transactions": ["address_from", "address_to", "amount", "fee_amount", "key"]
+            "transactions": [
+                "address_from",
+                "address_to",
+                "amount",
+                "fee_amount",
+                "key",
+            ],
         }
 
         for table in self.tables.keys():
@@ -42,13 +46,11 @@ class PersistentRepository:
             d[col[0]] = row[idx]
         return d
 
-    def create(
-        self, input_entity: Entity, table_name: str
-    ) -> None:
+    def create(self, input_entity: Entity, table_name: str) -> None:
         execute_str = (
-                "INSERT INTO {} VALUES(".format(table_name)
-                + ", ".join([":" + i for i in self.tables[table_name]])
-                + ");"
+            "INSERT INTO {} VALUES(".format(table_name)
+            + ", ".join([":" + i for i in self.tables[table_name]])
+            + ");"
         )
         inputs = SerializerForDB().serialize(
             table_name, input_entity, self.tables[table_name]
@@ -89,9 +91,17 @@ class PersistentRepository:
         except TypeError:
             raise DoesNotExistError(entity_id)
 
-    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: dict[str, Any]) -> None:
+    def update(
+        self,
+        entity_id: UUID,
+        column_name: str,
+        table_name: str,
+        changes: dict[str, Any],
+    ) -> None:
         try:
-            self.read_one(entity_id, table_name, column_name)  # will throw exception if needed
+            self.read_one(
+                entity_id, table_name, column_name
+            )  # will throw exception if needed
             set_sql = ", ".join(
                 [
                     "{}={}".format(
@@ -114,4 +124,3 @@ class PersistentRepository:
     def drop_all(self) -> None:
         for table in self.tables.keys():
             self.cur.execute("DROP TABLE " + table)
-            

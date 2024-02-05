@@ -1,44 +1,55 @@
-from typing import Any, Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Header, Request
 from fastapi.responses import JSONResponse
 
 from library.core.bitcoin_converter import BitcoinToCurrency
-from library.core.entities import User, Wallet, UsdWallet, Entity, Transaction
-from library.core.errors import DoesNotExistError, WalletLimitReached, ApiKeyWrong, WalletAddressNotOwn, \
-    SendAmountExceedsBalance
-from library.core.service import Service, Authenticator
-from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope, WalletItemEnvelope, \
-    TransactionItem, TransactionListEnvelope
+from library.core.entities import Entity, Transaction, UsdWallet, User, Wallet
+from library.core.errors import (
+    ApiKeyWrong,
+    DoesNotExistError,
+    SendAmountExceedsBalance,
+    WalletAddressNotOwn,
+    WalletLimitReached,
+)
+from library.core.service import Authenticator, Service
+from library.infra.fastapi.base_models import (
+    TransactionItem,
+    TransactionListEnvelope,
+    UsdWalletItemEnvelope,
+    UserItemEnvelope,
+    WalletItemEnvelope,
+)
 from library.infra.fastapi.dependables import RepositoryDependable
 
 api = APIRouter()
 
 
 @api.post("/users", status_code=201, response_model=UserItemEnvelope, tags=["Users"])
-def create_user(
-    repo_dependable: RepositoryDependable
-) -> dict[str, User]:
+def create_user(repo_dependable: RepositoryDependable) -> dict[str, User]:
     new_user = User()
     Service(repo_dependable).create(new_user, "users")
     return {"user": new_user}
 
 
-@api.post("/wallets", status_code=201, response_model=UsdWalletItemEnvelope, tags=["Wallets"])
+@api.post(
+    "/wallets", status_code=201, response_model=UsdWalletItemEnvelope, tags=["Wallets"]
+)
 def create_wallet(
-    request: Request,
-    repo_dependable: RepositoryDependable
+    request: Request, repo_dependable: RepositoryDependable
 ) -> dict[str, UsdWallet] | JSONResponse:
-    x_api_key = UUID(request.headers['x-api-key'])
+    x_api_key = UUID(request.headers["x-api-key"])
     try:
         Authenticator(repo_dependable).authenticate(x_api_key)
         wallet = Wallet(user_key=x_api_key)
         Service(repo_dependable).create_wallet(wallet)
         usd = BitcoinToCurrency().convert(wallet.bitcoins)
-        usd_wallet = UsdWallet(wallet_address=wallet.address,
-                               bitcoins_balance=wallet.bitcoins,
-                               usd_balance=usd)
+        usd_wallet = UsdWallet(
+            wallet_address=wallet.address,
+            bitcoins_balance=wallet.bitcoins,
+            usd_balance=usd,
+        )
         return {"usd_wallet": usd_wallet}
     except WalletLimitReached:
         msg = WalletLimitReached().msg()
@@ -55,22 +66,26 @@ def create_wallet(
 
 
 # es shesacvlelia: query parameters ar unda iyos rogorc gavige. request-shi unda iyos es wallet from, to da amount.
-@api.post("/transactions",
-          status_code=201,
-          response_model=TransactionItem,
-          tags=["Transactions"])
+@api.post(
+    "/transactions",
+    status_code=201,
+    response_model=TransactionItem,
+    tags=["Transactions"],
+)
 def create_transaction(
     transaction: dict[str, UUID | float],
     request: Request,
-    repo_dependable: RepositoryDependable
+    repo_dependable: RepositoryDependable,
 ) -> JSONResponse:
-    x_api_key = UUID(request.headers['x-api-key'])
+    x_api_key = UUID(request.headers["x-api-key"])
     try:
         Authenticator(repo_dependable).authenticate(x_api_key)
-        wallet_from = transaction['address_from']
-        wallet_to = transaction['address_to']
-        send_amount = transaction['amount']
-        Service(repo_dependable).transfer(wallet_from, wallet_to, send_amount, x_api_key)
+        wallet_from = transaction["address_from"]
+        wallet_to = transaction["address_to"]
+        send_amount = transaction["amount"]
+        Service(repo_dependable).transfer(
+            wallet_from, wallet_to, send_amount, x_api_key
+        )
         return JSONResponse(status_code=201, content={})
     except ApiKeyWrong:
         msg = ApiKeyWrong().msg()
@@ -93,14 +108,15 @@ def create_transaction(
 
 
 @api.get(
-    "/users/{user_key}/", status_code=200, response_model=UserItemEnvelope, tags=["Users"]
+    "/users/{user_key}/",
+    status_code=200,
+    response_model=UserItemEnvelope,
+    tags=["Users"],
 )
 def read_one_user(
-    user_key: UUID,
-    request: Request,
-    repo_dependable: RepositoryDependable
+    user_key: UUID, request: Request, repo_dependable: RepositoryDependable
 ) -> dict[str, Entity] | JSONResponse:
-    x_api_key = request.headers['x-api-key']
+    x_api_key = request.headers["x-api-key"]
     try:
         Authenticator(repo_dependable).authenticate(UUID(x_api_key))
         return {"user": Service(repo_dependable).read(user_key, "users")}
@@ -119,18 +135,25 @@ def read_one_user(
 
 
 @api.get(
-    "/wallets/{address}/", status_code=200, response_model=WalletItemEnvelope, tags=["Wallets"]
+    "/wallets/{address}/",
+    status_code=200,
+    response_model=WalletItemEnvelope,
+    tags=["Wallets"],
 )
 def read_wallet_address(
-    address: UUID,
-    request: Request,
-    repo_dependable: RepositoryDependable
+    address: UUID, request: Request, repo_dependable: RepositoryDependable
 ) -> dict[str, UUID | float] | JSONResponse:
-    x_api_key = request.headers['x-api-key']
+    x_api_key = request.headers["x-api-key"]
     try:
         Authenticator(repo_dependable).authenticate(UUID(x_api_key))
-        bitcoins = Service(repo_dependable).read_wallet_bitcoins(address, 'wallets', 'address')
-        return {"wallet_address": address, 'bitcoins': bitcoins, 'usd': BitcoinToCurrency().convert(bitcoins)}
+        bitcoins = Service(repo_dependable).read_wallet_bitcoins(
+            address, "wallets", "address"
+        )
+        return {
+            "wallet_address": address,
+            "bitcoins": bitcoins,
+            "usd": BitcoinToCurrency().convert(bitcoins),
+        }
     except DoesNotExistError:
         msg = DoesNotExistError().msg("Wallet", "address", str(address))
         return JSONResponse(
@@ -146,16 +169,21 @@ def read_wallet_address(
 
 
 @api.get(
-    "/transactions", status_code=200, response_model=TransactionListEnvelope, tags=["transactions"]
+    "/transactions",
+    status_code=200,
+    response_model=TransactionListEnvelope,
+    tags=["transactions"],
 )
 def read_transactions(
-    request: Request,
-    repo_dependable: RepositoryDependable
+    request: Request, repo_dependable: RepositoryDependable
 ) -> dict[str, Transaction] | JSONResponse:
-    x_api_key = request.headers['x-api-key']
+    x_api_key = request.headers["x-api-key"]
     try:
         Authenticator(repo_dependable).authenticate(UUID(x_api_key))
-        transactions = Service(repo_dependable).read_multi(x_api_key, 'transactions', )
+        transactions = Service(repo_dependable).read_multi(
+            x_api_key,
+            "transactions",
+        )
         return {"transactions": transactions}
     except ApiKeyWrong:
         msg = ApiKeyWrong().msg()
@@ -163,4 +191,3 @@ def read_transactions(
             status_code=404,
             content={"error": {"message": msg}},
         )
-

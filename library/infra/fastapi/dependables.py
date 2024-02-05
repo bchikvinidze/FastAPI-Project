@@ -11,4 +11,3 @@ def get_repository(request: Request) -> PersistentRepository:
 
 
 RepositoryDependable = Annotated[PersistentRepository, Depends(get_repository)]
-

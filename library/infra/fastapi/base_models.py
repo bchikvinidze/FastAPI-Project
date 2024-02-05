@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-#from library.core.entities import Purchase
+# from library.core.entities import Purchase
 
 
 # Requests:
@@ -29,8 +29,8 @@ class TransactionItem(BaseModel):
     address_from: UUID
     address_to: UUID
     amount: float
-    #fee_amount: float
-    #key: UUID
+    # fee_amount: float
+    # key: UUID
 
 
 # Envelopes for item

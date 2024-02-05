@@ -11,12 +11,12 @@ class BitcoinConverter(Protocol):
 
 
 class BitcoinToCurrency:
-    def convert(self, amount: float, currency: str = 'USD') -> float:
+    def convert(self, amount: float, currency: str = "USD") -> float:
         try:
-            url = f'https://blockchain.info/tobtc?currency={currency}&value=1'
+            url = f"https://blockchain.info/tobtc?currency={currency}&value=1"
             response = requests.get(url)
             assert response.status_code == 200
             result: float = response.json()
-            return 1/result
+            return 1 / result
         except UnsuccessfulRequest:
             return -1

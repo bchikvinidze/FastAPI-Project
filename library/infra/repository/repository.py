@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-from typing import Protocol, Any
+from typing import Any, Protocol
 from uuid import UUID
 
 from library.core.entities import Entity
 
 
 class Repository(Protocol):
-
-    def create(
-        self, input_entity: Entity, table_name: str
-    ) -> None:
+    def create(self, input_entity: Entity, table_name: str) -> None:
         pass
 
     def read_one(
@@ -23,5 +20,11 @@ class Repository(Protocol):
     ) -> list[dict[str, object]]:
         pass
 
-    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: dict[str, Any]) -> None:
+    def update(
+        self,
+        entity_id: UUID,
+        column_name: str,
+        table_name: str,
+        changes: dict[str, Any],
+    ) -> None:
         pass

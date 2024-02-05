@@ -1,5 +1,6 @@
 # To do is: make all messages contain inputs and not just plain text.
 
+
 class DoesNotExistError(Exception):
     def msg(self, class_name: str, attr: str, inp: str) -> str:
         return class_name + " with " + attr + "<" + inp + "> does not exist."
@@ -27,4 +28,3 @@ class SendAmountExceedsBalance(Exception):
 
 class UnsuccessfulRequest(Exception):
     pass
-

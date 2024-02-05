@@ -42,4 +42,3 @@ class Transaction:
     amount: float
     fee_amount: float = 0.0
     key: UUID = field(default_factory=uuid4)
-
