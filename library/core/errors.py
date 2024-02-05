@@ -21,25 +21,25 @@ class DoesNotExistError(WebException):
 
 
 class WalletLimitReached(WebException):
-    def __init__(self):
+    def __init__(self) -> None:
         self.status_code = 409
         self.msg = "wallet limit reached. Can't create any new wallets."
 
 
 class ApiKeyWrong(WebException):
-    def __init__(self):
+    def __init__(self) -> None:
         self.status_code = 404
         self.msg = "API key is wrong."
 
 
 class WalletAddressNotOwn(WebException):
-    def __init__(self):
+    def __init__(self) -> None:
         self.status_code = 403
         self.msg = "Can only transfer from own wallet addresses"
 
 
 class SendAmountExceedsBalance(WebException):
-    def __init__(self):
+    def __init__(self) -> None:
         self.status_code = 403
         self.msg = "Can only transfer if balance is more than send amount"
 

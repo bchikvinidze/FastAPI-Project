@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Any
+from typing import Any, Dict, List, Tuple
 from uuid import UUID
 
 from constants import DB_NAME
@@ -35,8 +35,8 @@ class PersistentRepository:
     # https://stackoverflow.com/questions/3300464/how-can-i-get-dict-from-sqlite-query
     @staticmethod
     def dict_factory(
-        cursor: sqlite3.Cursor, row: tuple[dict[str, Any]]
-    ) -> dict[str, dict[str, Any]]:
+        cursor: sqlite3.Cursor, row: Tuple[Dict[str, Any]]
+    ) -> Dict[str, Dict[str, Any]]:
         d = {}
         for idx, col in enumerate(cursor.description):
             d[col[0]] = row[idx]
@@ -50,20 +50,20 @@ class PersistentRepository:
                 + ", ".join([":" + i for i in self.tables[table_name]])
                 + ");"
         )
-        inputs = SerializerForDB().serialize(
-            table_name, input_entity, self.tables[table_name]
+        inputs = Serializer().serialize(
+            input_entity, self.tables[table_name]
         )
         self.cur.execute(execute_str, inputs)
         self.con.commit()
 
     def read_one(
         self, entity_id: UUID, table_name: str, column_name: str
-    ) -> dict[str, object]:
+    ) -> Dict[str, object]:
         try:
             str_to_execute = "SELECT * FROM {} WHERE {}='{}'".format(
                 table_name, column_name, entity_id
             )
-            fetch: dict[str, object] = self.cur.execute(str_to_execute).fetchone()
+            fetch: Dict[str, object] = self.cur.execute(str_to_execute).fetchone()
             if len(fetch) == 0:
                 raise DoesNotExistError(table_name, column_name, str(entity_id))
             return fetch
@@ -74,7 +74,7 @@ class PersistentRepository:
 
     def read_multi(
         self, entity_id: UUID, table_name: str, column_name: str = "USER_KEY"
-    ) -> list[dict[str, object]]:
+    ) -> List[Dict[str, object]]:
         try:
             str_to_execute = "SELECT * FROM {} WHERE {}='{}'".format(
                 table_name, column_name, entity_id
@@ -89,7 +89,7 @@ class PersistentRepository:
         except TypeError:
             raise DoesNotExistError(table_name, column_name, str(entity_id))
 
-    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: dict[str, Any]) -> None:
+    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: Dict[str, Any]) -> None:
         try:
             self.read_one(entity_id, table_name, column_name)  # will throw exception if needed
             set_sql = ", ".join(
