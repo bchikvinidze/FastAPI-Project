@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List
+from typing import Dict, List, cast
 from uuid import UUID
 
 from fastapi import APIRouter, Request
@@ -63,9 +63,9 @@ def create_transaction(
     x_api_key = UUID(request.headers['x-api-key'])
     try:
         Authenticator(repo_dependable).authenticate(x_api_key)
-        wallet_from = transaction['address_from']
-        wallet_to = transaction['address_to']
-        send_amount = transaction['amount']
+        wallet_from = cast(UUID, transaction['address_from'])
+        wallet_to = cast(UUID, transaction['address_to'])
+        send_amount = cast(float, transaction['amount'])
         Service(repo_dependable).transfer(wallet_from,
                                           wallet_to,
                                           send_amount,
