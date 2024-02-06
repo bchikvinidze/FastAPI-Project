@@ -19,7 +19,7 @@ class Serializer:
         result = dt.__dict__
         result = {k: result[k] for k in columns}
         for key in result.keys():
-            if self.columns[0] in key or self.columns[1] in key:
+            if any(column in key for column in self.columns):
                 result[key] = str(result[key])
         return result
 
