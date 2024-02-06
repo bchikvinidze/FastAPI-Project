@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Tuple
 from uuid import UUID
 
 from constants import DB_NAME
-from library.core.entities import Entity
+from library.core.entities import IEntity
 from library.core.errors import (
     DoesNotExistError, DoesNotExistErrorTable,
 )
@@ -19,7 +19,11 @@ class PersistentRepository:
         self.tables = {
             "users": ["key"],
             "wallets": ["address", "bitcoins", "user_key", "key"],
-            "transactions": ["address_from", "address_to", "amount", "fee_amount", "key"]
+            "transactions": ["address_from",
+                             "address_to",
+                             "amount",
+                             "fee_amount",
+                             "key"]
         }
 
         for table in self.tables.keys():
@@ -43,13 +47,14 @@ class PersistentRepository:
         return d
 
     def create(
-        self, input_entity: Entity, table_name: str
+        self, input_entity: IEntity, table_name: str
     ) -> None:
-        execute_str = (
+        execute_str = \
+            (
                 "INSERT INTO {} VALUES(".format(table_name)
                 + ", ".join([":" + i for i in self.tables[table_name]])
                 + ");"
-        )
+            )
         inputs = Serializer().serialize(
             input_entity, self.tables[table_name]
         )
@@ -104,9 +109,11 @@ class PersistentRepository:
         except TypeError:
             raise DoesNotExistErrorTable(table_name)
 
-    def update(self, entity_id: UUID, column_name: str, table_name: str, changes: Dict[str, Any]) -> None:
+    def update(self, entity_id: UUID,
+               column_name: str, table_name: str,
+               changes: Dict[str, Any]) -> None:
         try:
-            self.read_one(entity_id, table_name, column_name)  # will throw exception if needed
+            self.read_one(entity_id, table_name, column_name)
             set_sql = ", ".join(
                 [
                     "{}={}".format(
@@ -129,4 +136,3 @@ class PersistentRepository:
     def drop_all(self) -> None:
         for table in self.tables.keys():
             self.cur.execute("DROP TABLE " + table)
-            

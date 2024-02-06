@@ -17,6 +17,6 @@ class BitcoinToCurrency:
             response = requests.get(url)
             assert response.status_code == 200
             result: float = response.json()
-            return 1/result
+            return 1 / result
         except UnsuccessfulRequest:
             return -1

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Dict
+from typing import Dict, List, cast
 from uuid import UUID
 
 from fastapi import APIRouter, Request
@@ -14,6 +15,12 @@ from library.core.service import Service
 from library.core.authenticate import UserAuthenticator, AdminAuthenticator
 from library.infra.fastapi.base_models import UserItemEnvelope, UsdWalletItemEnvelope, WalletItemEnvelope, \
     TransactionItem, TransactionListEnvelope, StatisticsItem, StatisticsItemEnvelope
+from library.core.entities import User, Wallet, UsdWallet, IEntity, Transaction
+from library.core.errors import WebException
+from library.core.service import Service
+from library.infra.fastapi.base_models import UserItemEnvelope, \
+    UsdWalletItemEnvelope, WalletItemEnvelope, \
+    TransactionItem, TransactionListEnvelope
 from library.infra.fastapi.dependables import RepositoryDependable
 
 api = APIRouter()
@@ -22,17 +29,18 @@ api = APIRouter()
 @api.post("/users", status_code=201, response_model=UserItemEnvelope, tags=["Users"])
 def create_user(
         repo_dependable: RepositoryDependable
-) -> dict[str, User]:
+) -> Dict[str, User]:
     new_user = User()
     Service(repo_dependable).create(new_user, "users")
     return {"user": new_user}
 
 
-@api.post("/wallets", status_code=201, response_model=UsdWalletItemEnvelope, tags=["Wallets"])
+@api.post("/wallets", status_code=201,
+          response_model=UsdWalletItemEnvelope, tags=["Wallets"])
 def create_wallet(
         request: Request,
         repo_dependable: RepositoryDependable
-) -> dict[str, UsdWallet] | JSONResponse:
+) -> Dict[str, UsdWallet] | JSONResponse:
     x_api_key = UUID(request.headers['x-api-key'])
     try:
         UserAuthenticator(repo_dependable).authenticate(x_api_key)
@@ -49,7 +57,8 @@ def create_wallet(
     #     return ApiKeyWrong().json_response()
 
 
-# es shesacvlelia: query parameters ar unda iyos rogorc gavige. request-shi unda iyos es wallet from, to da amount.
+# es shesacvlelia: query parameters ar unda iyos rogorc gavige.
+# request-shi unda iyos es wallet from, to da amount.
 @api.post("/transactions",
           status_code=201,
           response_model=TransactionItem,
@@ -62,10 +71,13 @@ def create_transaction(
     x_api_key = UUID(request.headers['x-api-key'])
     try:
         UserAuthenticator(repo_dependable).authenticate(x_api_key)
-        wallet_from = transaction['address_from']
-        wallet_to = transaction['address_to']
-        send_amount = transaction['amount']
-        Service(repo_dependable).transfer(wallet_from, wallet_to, send_amount, x_api_key)
+        wallet_from = cast(UUID, transaction['address_from'])
+        wallet_to = cast(UUID, transaction['address_to'])
+        send_amount = cast(float, transaction['amount'])
+        Service(repo_dependable).transfer(wallet_from,
+                                          wallet_to,
+                                          send_amount,
+                                          x_api_key)
         return JSONResponse(status_code=201, content={})
     except WebException as we:
         return we.json_response()
@@ -78,13 +90,14 @@ def create_transaction(
 
 
 @api.get(
-    "/users/{user_key}/", status_code=200, response_model=UserItemEnvelope, tags=["Users"]
+    "/users/{user_key}/", status_code=200,
+    response_model=UserItemEnvelope, tags=["Users"]
 )
 def read_one_user(
         user_key: UUID,
         request: Request,
         repo_dependable: RepositoryDependable
-) -> dict[str, Entity] | JSONResponse:
+) -> dict[str, IEntity] | JSONResponse:
     x_api_key = request.headers['x-api-key']
     try:
         UserAuthenticator(repo_dependable).authenticate(UUID(x_api_key))
@@ -100,18 +113,22 @@ def read_one_user(
 
 
 @api.get(
-    "/wallets/{address}/", status_code=200, response_model=WalletItemEnvelope, tags=["Wallets"]
+    "/wallets/{address}/", status_code=200,
+    response_model=WalletItemEnvelope, tags=["Wallets"]
 )
 def read_wallet_address(
         address: UUID,
         request: Request,
         repo_dependable: RepositoryDependable
-) -> dict[str, UUID | float] | JSONResponse:
+) -> Dict[str, UUID | float] | JSONResponse:
     x_api_key = request.headers['x-api-key']
     try:
         UserAuthenticator(repo_dependable).authenticate(UUID(x_api_key))
-        bitcoins = Service(repo_dependable).read_wallet_bitcoins(address, 'wallets', 'address')
-        return {"wallet_address": address, 'bitcoins': bitcoins, 'usd': BitcoinToCurrency().convert(bitcoins)}
+        bitcoins = Service(repo_dependable).read_wallet_bitcoins(
+            address, 'wallets', 'address')
+        return {"wallet_address": address,
+                'bitcoins': bitcoins,
+                'usd': BitcoinToCurrency().convert(bitcoins)}
     except WebException as we:
         return we.json_response()
     # except DoesNotExistError:
@@ -123,12 +140,13 @@ def read_wallet_address(
 
 
 @api.get(
-    "/transactions", status_code=200, response_model=TransactionListEnvelope, tags=["transactions"]
+    "/transactions", status_code=200,
+    response_model=TransactionListEnvelope, tags=["transactions"]
 )
 def read_transactions(
         request: Request,
         repo_dependable: RepositoryDependable
-) -> dict[str, list[Transaction]] | JSONResponse:
+) -> Dict[str, List[Transaction]] | JSONResponse:
     x_api_key = UUID(request.headers['x-api-key'])
     try:
         UserAuthenticator(repo_dependable).authenticate(x_api_key)
@@ -141,13 +159,14 @@ def read_transactions(
 
 
 @api.get(
-    "/wallets/{address}/transactions", status_code=200, response_model=TransactionListEnvelope, tags=["transactions"]
+    "/wallets/{address}/transactions", status_code=200,
+    response_model=TransactionListEnvelope, tags=["transactions"]
 )
 def read_wallet_transactions(
         address: UUID,
         request: Request,
         repo_dependable: RepositoryDependable
-) -> dict[str, list[Transaction]] | JSONResponse:
+) -> Dict[str, List[Transaction]] | JSONResponse:
     x_api_key = UUID(request.headers['x-api-key'])
     try:
         UserAuthenticator(repo_dependable).authenticate(x_api_key)
@@ -170,7 +189,6 @@ def get_statistics(
     try:
         AdminAuthenticator().authenticate(x_api_key)
         curr_statistics = Service(repo_dependable).get_statistics()
-        print("aaa", curr_statistics)
         return {"statistics": curr_statistics}
     except WebException as we:
         return we.json_response()

@@ -10,7 +10,7 @@ Open-Closed Principle: SerializerForDB ცოტა არღვევს:
 
 from __future__ import annotations
 
-from typing import Dict, List, Type, cast, TypeVar, Generic, Protocol, Union, Any, Never
+from typing import Dict, List, TypeVar
 from uuid import UUID
 
 from dataclasses import dataclass, field
@@ -25,7 +25,7 @@ T = TypeVar("T")
 class Serializer:
     columns: List[str] = field(default_factory=lambda: ["key", "address"])
 
-    def serialize(self, dt: entities.Entity, columns: List[str]) -> Dict[str, object]:
+    def serialize(self, dt: entities.IEntity, columns: List[str]) -> Dict[str, object]:
         result = dt.__dict__
         result = {k: result[k] for k in columns}
         # db can't accept UUID, so converting to string
@@ -34,7 +34,7 @@ class Serializer:
                 result[key] = str(result[key])
         return result
 
-    def deserialize(self, input_data: Dict[str, object]) -> entities.Entity:
+    def deserialize(self, input_data: Dict[str, object]) -> entities.IEntity:
         return from_dict(
             data_class=entities.Entity,
             data=input_data,
