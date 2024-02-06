@@ -32,9 +32,21 @@ class TransactionItem(BaseModel):
     # key: UUID
 
 
+
+class StatisticsItem(BaseModel):
+    count_transactions: int
+    total_profit: float
+    # key: UUID
+
+
+
 # Envelopes for item
 class UserItemEnvelope(BaseModel):
     user: UserItem
+
+
+class StatisticsItemEnvelope(BaseModel):
+    statistics: StatisticsItem
 
 
 class UsdWalletItemEnvelope(BaseModel):

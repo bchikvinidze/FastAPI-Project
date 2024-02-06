@@ -5,13 +5,13 @@ from typing import List
 from uuid import UUID
 
 from constants import TRANSACTION_FEE, WALLET_CNT_LIMIT
-from library.core.entities import IEntity, Transaction, User, Wallet
+from library.core.entities import Entity, Transaction, User, Wallet, Statistic
+from library.core.entities import Transaction, User, Wallet, IEntity
+
 from library.core.errors import (
-    ApiKeyWrong,
-    DoesNotExistError,
     SendAmountExceedsBalance,
     WalletAddressNotOwn,
-    WalletLimitReached,
+    WalletLimitReached, DoesNotExistError, ApiKeyWrong,
 )
 from library.core.serialization import (
     Serializer,
@@ -146,13 +146,20 @@ class Service:
             )
         return transactions
 
+    def get_statistics(self) -> Statistic:
+        transactions = self.repo.read_all('transactions')
+        # print(transactions)
+        result = []
+        for item in transactions:
+            result.append(
+                # old version
+                #SerializerForDB().deserialize_transaction(item)
+                SerializeTransaction().deserialize(input_data=item)
+            )
+        total_profit = sum(transaction.fee_amount for transaction in result)
+        count_transactions = len(result)
+        # print(count_transactions)
 
-@dataclass
-class Authenticator:
-    repo: Repository
 
-    def authenticate(self, api_key: UUID) -> None:
-        try:
-            res = self.repo.read_one(api_key, "users", "key")
-        except DoesNotExistError:
-            raise ApiKeyWrong(api_key)
+        stat = Statistic(count_transactions=count_transactions, total_profit=total_profit)
+        return stat

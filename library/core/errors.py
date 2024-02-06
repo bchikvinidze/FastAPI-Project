@@ -47,3 +47,9 @@ class SendAmountExceedsBalance(WebException):
 
 class UnsuccessfulRequest(Exception):
     pass
+
+
+class DoesNotExistErrorTable(WebException):
+    def __init__(self, table_name: str,):
+        self.status_code = 404
+        self.msg = table_name + " does not exist."
