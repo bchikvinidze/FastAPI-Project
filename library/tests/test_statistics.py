@@ -84,7 +84,7 @@ def test_statistics_nonzero_fee(client: TestClient) -> None:
     assert transaction_response.json() == {}
     assert statistics_response.status_code == 200
     assert transaction_number == 1
-    assert platform_profit == TRANSACTION_FEE*send_amount
+    assert platform_profit == TRANSACTION_FEE * send_amount
 
 
 def test_statistics_wrong_authentication(client: TestClient) -> None:

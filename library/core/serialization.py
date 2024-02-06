@@ -33,7 +33,6 @@ class Serializer:
 
 @dataclass
 class SerializeWallet(Serializer):
-
     def deserialize(self, input_data: Dict[str, object]) -> entities.Wallet:
         return from_dict(
             data_class=entities.Wallet,
@@ -44,7 +43,6 @@ class SerializeWallet(Serializer):
 
 @dataclass
 class SerializeTransaction(Serializer):
-
     def deserialize(self, input_data: Dict[str, object]) -> entities.Transaction:
         return from_dict(
             data_class=entities.Transaction,
@@ -55,7 +53,6 @@ class SerializeTransaction(Serializer):
 
 @dataclass
 class SerializeUser(Serializer):
-
     def deserialize(self, input_data: Dict[str, object]) -> entities.User:
         return from_dict(
             data_class=entities.User,

@@ -7,24 +7,6 @@ After running above command, write http://127.0.0.1:9000/docs in your browser to
 
 Bitcoin to USD API: https://www.blockchain.com/explorer/api/exchange_rates_api
 
-Things left to do:
-
-1)❗test transaction from own to another wallet(fee is correct)
-2) ❗proeqtis requirement.txt shi pip da mypys versionebis damateba 
-3) ❓wallet-დან იგივე wallet-ში გადარიცხვა შესაძლებელი უნდა იყოს
-4) ✅Service.py-shi Service class could be decomposed into multiple smaller classes and we will have better S from SOLID. : In Progress
-5) ✅transaction tests have common methods now --some tests are too heavy. find a way to make them shorter and easier to read
-6) ✅ `GET /statistics`
-7) ✅ mypy fixes
-8) ✅ tests are all in 1 file, maybe redistribute to few files? I got 1 point deduction last time for this
-9) ✅Some errors are not informative: add input information in output messages, not just static message string.
-10) ✅ ~~Serialization is dargveving Single responsibility - think about how to solve this proble. (comment in the beginning of hw)~~
-11) ✅ `GET /wallets/{address}/transactions`
-12) ✅  test_transactions_get- es dasaweria da shesabamisad cvlilebebi transactionis get-stvis Service class-shi.
-13) 🔶ar gvchirdeba mara tu gindat In-Memory repository shegidzliat sheqmnat. wina davalebashi ar gamiketebia ar iyo sachiro da arc aq gvchirdeba.
-14) 🔶proeqtis README-s dawera - ra failshi ra xdeba.
-
-
 
 ## Intro
 

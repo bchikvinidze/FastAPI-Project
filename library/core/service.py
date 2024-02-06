@@ -9,9 +9,10 @@ from constants import TRANSACTION_FEE, WALLET_CNT_LIMIT
 from library.core import entities
 from library.core.entities import Entity, IEntity, Statistic, Transaction, User, Wallet
 from library.core.errors import (
+    SameAddressTransferError,
     SendAmountExceedsBalance,
     WalletAddressNotOwn,
-    WalletLimitReached, SameAddressTransferError,
+    WalletLimitReached,
 )
 from library.core.serialization import (
     Serializer,
@@ -23,7 +24,6 @@ from library.infra.repository.repository import Repository
 
 
 class ICommand(ABC):
-
     @abstractmethod
     def execute(self) -> None:
         pass
@@ -53,7 +53,6 @@ class UserService(ICommand):
 
 
 class WalletService(ICommand):
-
     def __init__(
         self,
         repo: Repository,
@@ -119,7 +118,6 @@ class TransactionService(ICommand):
 
 
 class StatisticsService(ICommand):
-
     def __init__(
         self, repo: Repository, table_name: str, input_entity: IEntity = Entity()
     ) -> None:

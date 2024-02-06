@@ -7,7 +7,6 @@ from library.core.entities import IEntity
 
 
 class Repository(Protocol):
-
     def create(self, input_entity: IEntity, table_name: str) -> None:
         pass
 
