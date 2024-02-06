@@ -1,4 +1,3 @@
-# To do is: make all messages contain inputs and not just plain text.
 from dataclasses import dataclass
 from uuid import UUID
 

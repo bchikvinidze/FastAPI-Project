@@ -33,7 +33,6 @@ def test_statistics(client: TestClient) -> None:
     statistics_response = client.get(
         "/statistics", headers={"x-api-key": ADMIN_API_KEY}
     )
-    # print("here", statistics_response.json())
     transaction_number = statistics_response.json()["statistics"]["count_transactions"]
     platform_profit = statistics_response.json()["statistics"]["total_profit"]
 

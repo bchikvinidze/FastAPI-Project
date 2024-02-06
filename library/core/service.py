@@ -20,9 +20,6 @@ from library.core.serialization import (
 from library.infra.repository.repository import Repository
 
 
-# drota ganmavlobashi chasashlelia ramdenime
-# servisad (tore single responsibilitys argvevs dzaaaan)
-# wallets tavisi eqneba, trannazqciebs - tavisi da a.sh
 @dataclass
 class Service:
     repo: Repository
@@ -49,7 +46,7 @@ class Service:
         res = self.repo.read_one(entity_id, table_name, column_name)
         if (
             table_name == "wallets"
-        ):  # es dzaan sashinelebaa, if ar unda mchirdebodes wesit
+        ):
             return SerializeWallet().deserialize(res)
         return SerializeUser().deserialize(res)
 
@@ -61,7 +58,6 @@ class Service:
             return False
         return True
 
-    # egreve transaction klass s ver gadavce tore SOLID-is I dairgveva mgoni.
     def transfer(
         self,
         wallet_from_address: UUID,
@@ -93,11 +89,9 @@ class Service:
         changes_from = {"bitcoins": wallet_from_initial - send_amount - fee_amount}
         changes_to = {"bitcoins": wallet_to_initial + send_amount}
 
-        # update respective wallets in db
         self.repo.update(wallet_from_address, "address", "wallets", changes_from)
         self.repo.update(wallet_to_address, "address", "wallets", changes_to)
 
-        # add new transaction to repository
         transaction = Transaction(
             address_from=wallet_from_address,
             address_to=wallet_to_address,
@@ -121,7 +115,6 @@ class Service:
         for wallet_raw in user_wallets:
             wallet_item = SerializeWallet().deserialize(wallet_raw)
 
-            # get transactions where amount was sent from given address.
             list_result = self.repo.read_multi(
                 wallet_item.address, "transactions", "address_from"
             )
@@ -138,20 +131,15 @@ class Service:
         to_list = self.repo.read_multi(address, "transactions", "address_to")
         for item in from_list + to_list:
             transactions.append(
-                # old version
-                # SerializerForDB().deserialize_transaction(item)
                 SerializeTransaction().deserialize(input_data=item)
             )
         return transactions
 
     def get_statistics(self) -> Statistic:
         transactions = self.repo.read_all("transactions")
-        # print(transactions)
         result = []
         for item in transactions:
             result.append(
-                # old version
-                # SerializerForDB().deserialize_transaction(item)
                 SerializeTransaction().deserialize(input_data=item)
             )
         total_profit = sum(transaction.fee_amount for transaction in result)

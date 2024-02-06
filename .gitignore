@@ -1,3 +1,8 @@
 # .gitignore
 .pytest_cache/
 .mypy_cache/
+__pycache__/
+library/__pycache__/
+library/tests/__pycache__/
+library/core/__pycache__/
+wallets_db.db

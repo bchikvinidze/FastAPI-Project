@@ -31,5 +31,4 @@ class AdminAuthenticator:
 
     def authenticate(self, api_key: UUID) -> None:
         if str(api_key) != self.__admin_api_key:
-            print("here")
             raise ApiKeyWrong(api_key)

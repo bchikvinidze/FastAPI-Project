@@ -35,8 +35,6 @@ class PersistentRepository:
                 + ")"
             )
 
-    # taken from:
-    # https://stackoverflow.com/questions/3300464/how-can-i-get-dict-from-sqlite-query
     @staticmethod
     def dict_factory(
         cursor: sqlite3.Cursor, row: Tuple[Dict[str, Any]]

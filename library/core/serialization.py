@@ -18,7 +18,6 @@ class Serializer:
     def serialize(self, dt: entities.IEntity, columns: List[str]) -> Dict[str, object]:
         result = dt.__dict__
         result = {k: result[k] for k in columns}
-        # db can't accept UUID, so converting to string
         for key in result.keys():
             if self.columns[0] in key or self.columns[1] in key:
                 result[key] = str(result[key])

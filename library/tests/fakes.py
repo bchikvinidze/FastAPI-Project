@@ -3,7 +3,7 @@ from typing import Any
 
 from faker import Faker
 
-FAKER_PRODUCT_DEFAULT_PRICE = 1.1
+from constants import FAKER_PRODUCT_DEFAULT_PRICE
 
 """
 @dataclass
@@ -15,7 +15,6 @@ class FakeUser:
 """
 
 
-# albat amaze damchirdeba rom Product-is shvilobili gavxado
 @dataclass
 class FakeProduct:
     faker: Faker = field(default_factory=Faker)

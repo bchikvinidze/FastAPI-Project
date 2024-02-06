@@ -1,25 +1,20 @@
 from fastapi.testclient import TestClient
 
 
-# transaction tests are quite heavy - I'm not a huge fan.
 def test_transaction_own(client: TestClient) -> None:
-    # create user and wallets
     response = client.post("/users")
     api_key = response.json()["user"]["key"]
 
-    # wallet number 1
     response = client.post("/wallets", headers={"x-api-key": api_key})
     resp_wallet = response.json()["usd_wallet"]
     wallet_from = resp_wallet["wallet_address"]
     bitcoin_from_initial = resp_wallet["bitcoins_balance"]
 
-    # wallet number 2
     response = client.post("/wallets", headers={"x-api-key": api_key})
     resp_wallet = response.json()["usd_wallet"]
     wallet_to = resp_wallet["wallet_address"]
     bitcoin_to_initial = resp_wallet["bitcoins_balance"]
 
-    # do transaction
     send_amount = 0.7
     transaction_response = client.post(
         "/transactions",
@@ -30,8 +25,6 @@ def test_transaction_own(client: TestClient) -> None:
             "amount": send_amount,
         },
     )
-
-    # observe post-transaction balances:
     wallet_from_response = client.get(
         f"/wallets/{wallet_from}", headers={"x-api-key": api_key}
     )
@@ -50,16 +43,12 @@ def test_transaction_own(client: TestClient) -> None:
 
 
 def test_transaction_send_from_not_own(client: TestClient) -> None:
-    # should throw error if one tries sending from other user's wallet
-
-    # create user and wallets 1
     response = client.post("/users")
     api_key = response.json()["user"]["key"]
     response = client.post("/wallets", headers={"x-api-key": api_key})
     resp_wallet = response.json()["usd_wallet"]
     own_wallet = resp_wallet["wallet_address"]
 
-    # creation of another wallet for another user:
     response2 = client.post("/users")
     api_key2 = response2.json()["user"]["key"]
     response2 = client.post("/wallets", headers={"x-api-key": api_key2})
@@ -70,7 +59,6 @@ def test_transaction_send_from_not_own(client: TestClient) -> None:
         f"can only transfer from own wallet addresses"
     )
 
-    # do transaction
     send_amount = 0.7
     transaction_response = client.post(
         "/transactions",
@@ -87,21 +75,17 @@ def test_transaction_send_from_not_own(client: TestClient) -> None:
 
 
 def test_transaction_overspend(client: TestClient) -> None:
-    # create user and wallets
     response = client.post("/users")
     api_key = response.json()["user"]["key"]
 
-    # wallet number 1
     response = client.post("/wallets", headers={"x-api-key": api_key})
     resp_wallet = response.json()["usd_wallet"]
     wallet_from = resp_wallet["wallet_address"]
 
-    # wallet number 2
     response = client.post("/wallets", headers={"x-api-key": api_key})
     resp_wallet = response.json()["usd_wallet"]
     wallet_to = resp_wallet["wallet_address"]
 
-    # do transaction
     send_amount = 10.0
     exp_msg = f"Send amount {send_amount} less than balance"
     transaction_response = client.post(
@@ -119,21 +103,17 @@ def test_transaction_overspend(client: TestClient) -> None:
 
 
 def test_transactions_get(client: TestClient) -> None:
-    # create user and wallets
     response = client.post("/users")
     api_key = response.json()["user"]["key"]
 
-    # wallet number 1
     response = client.post("/wallets", headers={"x-api-key": api_key})
     resp_wallet = response.json()["usd_wallet"]
     wallet_from = resp_wallet["wallet_address"]
 
-    # wallet number 2
     response = client.post("/wallets", headers={"x-api-key": api_key})
     resp_wallet = response.json()["usd_wallet"]
     wallet_to = resp_wallet["wallet_address"]
 
-    # do transaction
     send_amount = 0.7
     transaction_response = client.post(
         "/transactions",
@@ -158,8 +138,6 @@ def test_transactions_get(client: TestClient) -> None:
         ]
     }
 
-    # test for get /wallets/{address}/transactions
-    # will write separately & expand later
     from_resp = client.get(
         f"/wallets/{wallet_from}/transactions",
         headers={"x-api-key": api_key},
