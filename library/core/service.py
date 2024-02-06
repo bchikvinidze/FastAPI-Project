@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-from abc import abstractmethod, ABC
-
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Protocol, cast, Any
+from typing import Any, List, cast
 from uuid import UUID, uuid4
 
 from constants import TRANSACTION_FEE, WALLET_CNT_LIMIT
 from library.core import entities
-from library.core.entities import IEntity, Statistic, Transaction, User, Wallet, Entity
+from library.core.entities import Entity, IEntity, Statistic, Transaction, User, Wallet
 from library.core.errors import (
     SendAmountExceedsBalance,
     WalletAddressNotOwn,
@@ -35,7 +34,12 @@ class ICommand(ABC):
 
 
 class UserService(ICommand):
-    def __init__(self, repo: Repository, table_name: str = "users", input_entity: IEntity = Entity()) -> None:
+    def __init__(
+        self,
+        repo: Repository,
+        table_name: str = "users",
+        input_entity: IEntity = Entity(),
+    ) -> None:
         self.repo = repo
         self.input_entity = input_entity
         self.table_name = table_name
@@ -50,7 +54,12 @@ class UserService(ICommand):
 
 class WalletService(ICommand):
 
-    def __init__(self, repo: Repository, table_name: str = "wallets", input_entity: IEntity = Entity()) -> None:
+    def __init__(
+        self,
+        repo: Repository,
+        table_name: str = "wallets",
+        input_entity: IEntity = Entity(),
+    ) -> None:
         self.repo = repo
         self.input_entity = input_entity
         self.table_name = table_name
@@ -71,7 +80,12 @@ class WalletService(ICommand):
 
 
 class TransactionService(ICommand):
-    def __init__(self, repo: Repository, table_name: str = "transactions", input_entity: IEntity = Entity()) -> None:
+    def __init__(
+        self,
+        repo: Repository,
+        table_name: str = "transactions",
+        input_entity: IEntity = Entity(),
+    ) -> None:
         self.repo = repo
         self.input_entity = input_entity
         self.table_name = table_name
@@ -100,15 +114,15 @@ class TransactionService(ICommand):
         from_list = self.repo.read_multi(address, "transactions", "address_from")
         to_list = self.repo.read_multi(address, "transactions", "address_to")
         for item in from_list + to_list:
-            transactions.append(
-                SerializeTransaction().deserialize(input_data=item)
-            )
+            transactions.append(SerializeTransaction().deserialize(input_data=item))
         return transactions
 
-      
+
 class StatisticsService(ICommand):
 
-    def __init__(self, repo: Repository, table_name: str, input_entity: IEntity = Entity()) -> None:
+    def __init__(
+        self, repo: Repository, table_name: str, input_entity: IEntity = Entity()
+    ) -> None:
         self.repo = repo
         self.input_entity = input_entity
         self.table_name = table_name
@@ -120,9 +134,7 @@ class StatisticsService(ICommand):
         transactions = self.repo.read_all(self.table_name)
         result = []
         for item in transactions:
-            result.append(
-                SerializeTransaction().deserialize(input_data=item)
-            )
+            result.append(SerializeTransaction().deserialize(input_data=item))
         total_profit = sum(transaction.fee_amount for transaction in result)
         count_transactions = len(result)
         stat = Statistic(
@@ -136,11 +148,11 @@ class TransferService:
     repo: Repository
 
     def transfer(
-            self,
-            wallet_from_address: UUID,
-            wallet_to_address: UUID,
-            send_amount: float,
-            x_api_key: UUID,
+        self,
+        wallet_from_address: UUID,
+        wallet_to_address: UUID,
+        send_amount: float,
+        x_api_key: UUID,
     ) -> None:
         wallet_from = SerializeWallet().deserialize(
             self.repo.read_one(wallet_from_address, "wallets", "address")
@@ -178,7 +190,7 @@ class TransferService:
         TransactionService(self.repo, input_entity=transaction).execute()
 
     def read_multi(
-            self, entity_id: UUID, table_name: str, column_name: str = "key"
+        self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> List[IEntity] | List[Wallet] | List[Transaction] | List[User]:
         list_result = self.repo.read_multi(entity_id, table_name, column_name)
         deserialized = []

@@ -17,7 +17,13 @@ from library.core.entities import (
     Wallet,
 )
 from library.core.errors import WebException
-from library.core.service import TransferService, UserService, WalletService, TransactionService, StatisticsService
+from library.core.service import (
+    StatisticsService,
+    TransactionService,
+    TransferService,
+    UserService,
+    WalletService,
+)
 from library.infra.fastapi.base_models import (
     StatisticsItemEnvelope,
     TransactionItem,
@@ -97,7 +103,9 @@ def read_one_user(
     x_api_key = request.headers["x-api-key"]
     try:
         UserAuthenticator(repo_dependable).authenticate(UUID(x_api_key))
-        return {"user": UserService(repo_dependable, "users", User()).read_execute(user_key)}
+        return {
+            "user": UserService(repo_dependable, "users", User()).read_execute(user_key)
+        }
     except WebException as we:
         return we.json_response()
 
@@ -114,9 +122,7 @@ def read_wallet_address(
     x_api_key = request.headers["x-api-key"]
     try:
         UserAuthenticator(repo_dependable).authenticate(UUID(x_api_key))
-        bitcoins = WalletService(repo_dependable).read_bitcoins(
-            address, "address"
-        )
+        bitcoins = WalletService(repo_dependable).read_bitcoins(address, "address")
         return {
             "wallet_address": address,
             "bitcoins": bitcoins,
@@ -174,7 +180,9 @@ def get_statistics(
     x_api_key = UUID(request.headers["x-api-key"])
     try:
         AdminAuthenticator().authenticate(x_api_key)
-        curr_statistics = StatisticsService(repo_dependable, "transactions").read_execute()
+        curr_statistics = StatisticsService(
+            repo_dependable, "transactions"
+        ).read_execute()
         return {"statistics": curr_statistics}
     except WebException as we:
         return we.json_response()
