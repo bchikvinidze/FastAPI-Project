@@ -10,10 +10,10 @@ Bitcoin to USD API: https://www.blockchain.com/explorer/api/exchange_rates_api
 Things left to do:
 
 1)❗test transaction from own to another wallet(fee is correct)
-2) ❗proeqtis requirement.txt shi pip da mypys versionebis damateba
-3) ❗Service.py-shi Service class could be decomposed into multiple smaller classes and we will have better S from SOLID. : In Progress
-4) ❗some tests are too heavy. find a way to make them shorter and easier to read
-5)❓wallet-დან იგივე wallet-ში გადარიცხვა შესაძლებელი უნდა იყოს
+2) ❗proeqtis requirement.txt shi pip da mypys versionebis damateba 
+3) ❓wallet-დან იგივე wallet-ში გადარიცხვა შესაძლებელი უნდა იყოს
+4) ✅Service.py-shi Service class could be decomposed into multiple smaller classes and we will have better S from SOLID. : In Progress
+5) ✅transaction tests have common methods now --some tests are too heavy. find a way to make them shorter and easier to read
 6) ✅ `GET /statistics`
 7) ✅ mypy fixes
 8) ✅ tests are all in 1 file, maybe redistribute to few files? I got 1 point deduction last time for this
