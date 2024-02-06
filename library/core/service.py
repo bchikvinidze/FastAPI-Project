@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import List
-
 from dataclasses import dataclass
+from typing import List
 from uuid import UUID
 
 from constants import TRANSACTION_FEE, WALLET_CNT_LIMIT
@@ -14,8 +13,12 @@ from library.core.errors import (
     WalletAddressNotOwn,
     WalletLimitReached, DoesNotExistError, ApiKeyWrong,
 )
-from library.core.serialization import Serializer, \
-    SerializeWallet, SerializeTransaction, SerializeUser
+from library.core.serialization import (
+    Serializer,
+    SerializeTransaction,
+    SerializeUser,
+    SerializeWallet,
+)
 from library.infra.repository.repository import Repository
 
 
@@ -76,13 +79,13 @@ class Service:
         )
 
         if wallet_from.user_key != x_api_key:
-            raise WalletAddressNotOwn
+            raise WalletAddressNotOwn(wallet_from_address)
 
         wallet_from_initial = wallet_from.bitcoins
         wallet_to_initial = wallet_to.bitcoins
 
         if wallet_from_initial < send_amount:
-            raise SendAmountExceedsBalance
+            raise SendAmountExceedsBalance(send_amount)
 
         fee_percent = 0.0
         if wallet_from.user_key != wallet_to.user_key:

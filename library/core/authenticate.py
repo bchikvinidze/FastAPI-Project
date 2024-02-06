@@ -22,7 +22,7 @@ class UserAuthenticator:
         try:
             _ = self.repo.read_one(api_key, "users", "key")
         except DoesNotExistError:
-            raise ApiKeyWrong
+            raise ApiKeyWrong(api_key)
 
 
 @dataclass
