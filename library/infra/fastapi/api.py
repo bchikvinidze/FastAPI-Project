@@ -17,7 +17,7 @@ from library.core.entities import (
     Wallet,
 )
 from library.core.errors import WebException
-from library.core.service import Service
+from library.core.service import TransferService, UserService, WalletService, TransactionService, StatisticsService
 from library.infra.fastapi.base_models import (
     StatisticsItemEnvelope,
     TransactionItem,
@@ -34,7 +34,7 @@ api = APIRouter()
 @api.post("/users", status_code=201, response_model=UserItemEnvelope, tags=["Users"])
 def create_user(repo_dependable: RepositoryDependable) -> Dict[str, User]:
     new_user = User()
-    Service(repo_dependable).create(new_user, "users")
+    UserService(repo_dependable, input_entity=new_user).execute()
     return {"user": new_user}
 
 
@@ -48,7 +48,7 @@ def create_wallet(
     try:
         UserAuthenticator(repo_dependable).authenticate(x_api_key)
         wallet = Wallet(user_key=x_api_key)
-        Service(repo_dependable).create_wallet(wallet)
+        WalletService(repo_dependable, "wallets", wallet).execute()
         usd = BitcoinToCurrency().convert(wallet.bitcoins)
         usd_wallet = UsdWallet(
             wallet_address=wallet.address,
@@ -77,7 +77,7 @@ def create_transaction(
         wallet_from = cast(UUID, transaction["address_from"])
         wallet_to = cast(UUID, transaction["address_to"])
         send_amount = cast(float, transaction["amount"])
-        Service(repo_dependable).transfer(
+        TransferService(repo_dependable).transfer(
             wallet_from, wallet_to, send_amount, x_api_key
         )
         return JSONResponse(status_code=201, content={})
@@ -97,7 +97,7 @@ def read_one_user(
     x_api_key = request.headers["x-api-key"]
     try:
         UserAuthenticator(repo_dependable).authenticate(UUID(x_api_key))
-        return {"user": Service(repo_dependable).read(user_key, "users")}
+        return {"user": UserService(repo_dependable, "users", User()).read_execute(user_key)}
     except WebException as we:
         return we.json_response()
 
@@ -114,8 +114,8 @@ def read_wallet_address(
     x_api_key = request.headers["x-api-key"]
     try:
         UserAuthenticator(repo_dependable).authenticate(UUID(x_api_key))
-        bitcoins = Service(repo_dependable).read_wallet_bitcoins(
-            address, "wallets", "address"
+        bitcoins = WalletService(repo_dependable).read_bitcoins(
+            address, "address"
         )
         return {
             "wallet_address": address,
@@ -138,7 +138,7 @@ def read_transactions(
     x_api_key = UUID(request.headers["x-api-key"])
     try:
         UserAuthenticator(repo_dependable).authenticate(x_api_key)
-        transactions = Service(repo_dependable).read_transactions(x_api_key)
+        transactions = TransactionService(repo_dependable).read_execute(x_api_key)
         return {"transactions": transactions}
     except WebException as we:
         return we.json_response()
@@ -156,7 +156,7 @@ def read_wallet_transactions(
     x_api_key = UUID(request.headers["x-api-key"])
     try:
         UserAuthenticator(repo_dependable).authenticate(x_api_key)
-        transactions = Service(repo_dependable).read_transactions_by_address(address)
+        transactions = TransactionService(repo_dependable).read_by_address(address)
         return {"transactions": transactions}
     except WebException as we:
         return we.json_response()
@@ -174,7 +174,7 @@ def get_statistics(
     x_api_key = UUID(request.headers["x-api-key"])
     try:
         AdminAuthenticator().authenticate(x_api_key)
-        curr_statistics = Service(repo_dependable).get_statistics()
+        curr_statistics = StatisticsService(repo_dependable, "transactions").read_execute()
         return {"statistics": curr_statistics}
     except WebException as we:
         return we.json_response()
