@@ -17,9 +17,10 @@ Things left to do:
 7) ✅ ~~Serialization is dargveving Single responsibility - think about how to solve this proble. (comment in the beginning of hw)~~
 8) 🔶ar gvchirdeba mara tu gindat In-Memory repository shegidzliat sheqmnat. wina davalebashi ar gamiketebia ar iyo sachiro da arc aq gvchirdeba.
 9) ❗Service.py-shi Service class could be decomposed into multiple smaller classes and we will have better S from SOLID. : In Progress
-10) ❗proeqtis README-s dawera - ra failshi ra xdeba.
+10) 🔶proeqtis README-s dawera - ra failshi ra xdeba.
 11) ✅  test_transactions_get- es dasaweria da shesabamisad cvlilebebi transactionis get-stvis Service class-shi. 
 12) ❗test transaction from own to another wallet(fee is correct)
+13) proeqtis requirement.txt shi pip da mypys versionebis damateba
 
 
 ## Intro
