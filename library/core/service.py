@@ -105,7 +105,7 @@ class TransactionService(ICommand):
             )
         return transactions
 
-
+      
 class StatisticsService(ICommand):
 
     def __init__(self, repo: Repository, table_name: str, input_entity: IEntity = Entity()) -> None:

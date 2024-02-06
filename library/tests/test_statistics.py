@@ -70,12 +70,9 @@ def test_statistics_wrong_authentication(client: TestClient) -> None:
         },
     )
 
-    statistics_response = client.get(
-        "/statistics", headers={"x-api-key": api_key}
-    )
+    statistics_response = client.get("/statistics", headers={"x-api-key": api_key})
     expected_msg = f"API key {api_key} is wrong."
     assert transaction_response.status_code == 201
     assert transaction_response.json() == {}
     assert statistics_response.status_code == 404
     assert statistics_response.json() == {"error": {"message": expected_msg}}
-
