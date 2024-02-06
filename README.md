@@ -8,6 +8,7 @@ After running above command, write http://127.0.0.1:9000/docs in your browser to
 Bitcoin to USD API: https://www.blockchain.com/explorer/api/exchange_rates_api
 
 Things left to do:
+
 1)❗test transaction from own to another wallet(fee is correct)
 2) ❗proeqtis requirement.txt shi pip da mypys versionebis damateba
 3) ❗Service.py-shi Service class could be decomposed into multiple smaller classes and we will have better S from SOLID. : In Progress
