@@ -156,8 +156,6 @@ class Service:
             )
         total_profit = sum(transaction.fee_amount for transaction in result)
         count_transactions = len(result)
-        # print(count_transactions)
-
         stat = Statistic(
             count_transactions=count_transactions, total_profit=total_profit
         )
