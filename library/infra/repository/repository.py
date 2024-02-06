@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Protocol, Any, List, Dict
+from typing import Any, Dict, List, Protocol
 from uuid import UUID
 
 from library.core.entities import IEntity
@@ -8,9 +8,7 @@ from library.core.entities import IEntity
 
 class Repository(Protocol):
 
-    def create(
-        self, input_entity: IEntity, table_name: str
-    ) -> None:
+    def create(self, input_entity: IEntity, table_name: str) -> None:
         pass
 
     def read_one(
@@ -23,12 +21,14 @@ class Repository(Protocol):
     ) -> List[Dict[str, object]]:
         pass
 
-    def read_all(
-        self, table_name: str
-    ) -> List[Dict[str, object]]:
+    def read_all(self, table_name: str) -> List[Dict[str, object]]:
         pass
 
-
-    def update(self, entity_id: UUID, column_name: str,
-               table_name: str, changes: Dict[str, Any]) -> None:
+    def update(
+        self,
+        entity_id: UUID,
+        column_name: str,
+        table_name: str,
+        changes: Dict[str, Any],
+    ) -> None:
         pass

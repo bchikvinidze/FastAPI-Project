@@ -5,14 +5,14 @@ from faker import Faker
 
 FAKER_PRODUCT_DEFAULT_PRICE = 1.1
 
-'''
+"""
 @dataclass
 class FakeUser:
     faker: Faker = field(default_factory=Faker)
 
     def entity(self, author: str = "") -> dict[str, Any]:
         return {"key": self.faker. ()}
-'''
+"""
 
 
 # albat amaze damchirdeba rom Product-is shvilobili gavxado

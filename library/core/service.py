@@ -5,13 +5,11 @@ from typing import List
 from uuid import UUID
 
 from constants import TRANSACTION_FEE, WALLET_CNT_LIMIT
-from library.core.entities import Entity, Transaction, User, Wallet, Statistic
-from library.core.entities import Transaction, User, Wallet, IEntity
-
+from library.core.entities import IEntity, Statistic, Transaction, User, Wallet
 from library.core.errors import (
     SendAmountExceedsBalance,
     WalletAddressNotOwn,
-    WalletLimitReached, DoesNotExistError, ApiKeyWrong,
+    WalletLimitReached,
 )
 from library.core.serialization import (
     Serializer,
@@ -40,23 +38,23 @@ class Service:
         self.repo.create(input_entity, "wallets")
 
     def read_wallet_bitcoins(
-            self, entity_id: UUID, table_name: str, column_name: str = "key"
+        self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> float:
         res = self.repo.read_one(entity_id, table_name, column_name)
         return SerializeWallet().deserialize(res).bitcoins
 
     def read(
-            self, entity_id: UUID, table_name: str, column_name: str = "key"
+        self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> User | Wallet | IEntity:
         res = self.repo.read_one(entity_id, table_name, column_name)
         if (
-                table_name == "wallets"
+            table_name == "wallets"
         ):  # es dzaan sashinelebaa, if ar unda mchirdebodes wesit
             return SerializeWallet().deserialize(res)
         return SerializeUser().deserialize(res)
 
     def exists(
-            self, entity_id: UUID, table_name: str, column_name: str = "key"
+        self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> bool:
         res = self.repo.read_one(entity_id, table_name, column_name)
         if len(res) == 0:
@@ -65,11 +63,11 @@ class Service:
 
     # egreve transaction klass s ver gadavce tore SOLID-is I dairgveva mgoni.
     def transfer(
-            self,
-            wallet_from_address: UUID,
-            wallet_to_address: UUID,
-            send_amount: float,
-            x_api_key: UUID,
+        self,
+        wallet_from_address: UUID,
+        wallet_to_address: UUID,
+        send_amount: float,
+        x_api_key: UUID,
     ) -> None:
         wallet_from = SerializeWallet().deserialize(
             self.repo.read_one(wallet_from_address, "wallets", "address")
@@ -109,7 +107,7 @@ class Service:
         self.create(transaction, "transactions")
 
     def read_multi(
-            self, entity_id: UUID, table_name: str, column_name: str = "key"
+        self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> List[IEntity] | List[Wallet] | List[Transaction] | List[User]:
         list_result = self.repo.read_multi(entity_id, table_name, column_name)
         deserialized = []
@@ -136,8 +134,8 @@ class Service:
 
     def read_transactions_by_address(self, address: UUID) -> List[Transaction]:
         transactions = []
-        from_list = self.repo.read_multi(address, 'transactions', 'address_from')
-        to_list = self.repo.read_multi(address, 'transactions', 'address_to')
+        from_list = self.repo.read_multi(address, "transactions", "address_from")
+        to_list = self.repo.read_multi(address, "transactions", "address_to")
         for item in from_list + to_list:
             transactions.append(
                 # old version
@@ -147,19 +145,20 @@ class Service:
         return transactions
 
     def get_statistics(self) -> Statistic:
-        transactions = self.repo.read_all('transactions')
+        transactions = self.repo.read_all("transactions")
         # print(transactions)
         result = []
         for item in transactions:
             result.append(
                 # old version
-                #SerializerForDB().deserialize_transaction(item)
+                # SerializerForDB().deserialize_transaction(item)
                 SerializeTransaction().deserialize(input_data=item)
             )
         total_profit = sum(transaction.fee_amount for transaction in result)
         count_transactions = len(result)
         # print(count_transactions)
 
-
-        stat = Statistic(count_transactions=count_transactions, total_profit=total_profit)
+        stat = Statistic(
+            count_transactions=count_transactions, total_profit=total_profit
+        )
         return stat

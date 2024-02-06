@@ -11,8 +11,10 @@ class WebException(Exception):
     msg: str
 
     def json_response(self) -> JSONResponse:
-        return JSONResponse(status_code=self.status_code,
-                            content={"error": {"message": self.msg}}, )
+        return JSONResponse(
+            status_code=self.status_code,
+            content={"error": {"message": self.msg}},
+        )
 
 
 class DoesNotExistError(WebException):
@@ -36,7 +38,9 @@ class ApiKeyWrong(WebException):
 class WalletAddressNotOwn(WebException):
     def __init__(self, address: UUID) -> None:
         self.status_code = 403
-        self.msg = f"Error for address f{address}, can only transfer from own wallet addresses"
+        self.msg = (
+            f"Error for address f{address}, can only transfer from own wallet addresses"
+        )
 
 
 class SendAmountExceedsBalance(WebException):
@@ -50,6 +54,9 @@ class UnsuccessfulRequest(Exception):
 
 
 class DoesNotExistErrorTable(WebException):
-    def __init__(self, table_name: str,):
+    def __init__(
+        self,
+        table_name: str,
+    ):
         self.status_code = 404
         self.msg = table_name + " does not exist."

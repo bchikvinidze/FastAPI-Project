@@ -56,4 +56,3 @@ class Statistic:
     count_transactions: int
     total_profit: float
     # key: UUID = field(default_factory=uuid4)
-

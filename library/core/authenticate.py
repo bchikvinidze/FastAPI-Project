@@ -5,7 +5,7 @@ from typing import Protocol
 from uuid import UUID
 
 from constants import ADMIN_API_KEY
-from library.core.errors import DoesNotExistError, ApiKeyWrong
+from library.core.errors import ApiKeyWrong, DoesNotExistError
 from library.infra.repository.repository import Repository
 
 
@@ -31,4 +31,4 @@ class AdminAuthenticator:
 
     def authenticate(self, api_key: UUID) -> None:
         if str(api_key) != self.__admin_api_key:
-            raise ApiKeyWrong
+            raise ApiKeyWrong(api_key)

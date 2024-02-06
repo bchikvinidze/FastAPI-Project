@@ -4,9 +4,7 @@ from uuid import UUID
 
 from constants import DB_NAME
 from library.core.entities import IEntity
-from library.core.errors import (
-    DoesNotExistError, DoesNotExistErrorTable,
-)
+from library.core.errors import DoesNotExistError, DoesNotExistErrorTable
 from library.core.serialization import Serializer
 
 
@@ -19,11 +17,13 @@ class PersistentRepository:
         self.tables = {
             "users": ["key"],
             "wallets": ["address", "bitcoins", "user_key", "key"],
-            "transactions": ["address_from",
-                             "address_to",
-                             "amount",
-                             "fee_amount",
-                             "key"]
+            "transactions": [
+                "address_from",
+                "address_to",
+                "amount",
+                "fee_amount",
+                "key",
+            ],
         }
 
         for table in self.tables.keys():
@@ -46,18 +46,13 @@ class PersistentRepository:
             d[col[0]] = row[idx]
         return d
 
-    def create(
-        self, input_entity: IEntity, table_name: str
-    ) -> None:
-        execute_str = \
-            (
-                "INSERT INTO {} VALUES(".format(table_name)
-                + ", ".join([":" + i for i in self.tables[table_name]])
-                + ");"
-            )
-        inputs = Serializer().serialize(
-            input_entity, self.tables[table_name]
+    def create(self, input_entity: IEntity, table_name: str) -> None:
+        execute_str = (
+            "INSERT INTO {} VALUES(".format(table_name)
+            + ", ".join([":" + i for i in self.tables[table_name]])
+            + ");"
         )
+        inputs = Serializer().serialize(input_entity, self.tables[table_name])
         self.cur.execute(execute_str, inputs)
         self.con.commit()
 
@@ -94,9 +89,7 @@ class PersistentRepository:
         except TypeError:
             raise DoesNotExistError(table_name, column_name, str(entity_id))
 
-    def read_all(
-        self, table_name: str
-    ) -> List[Dict[str, object]]:
+    def read_all(self, table_name: str) -> List[Dict[str, object]]:
         try:
             str_to_execute = f"SELECT * FROM {table_name}"
             cursor = self.cur.execute(str_to_execute)
@@ -109,18 +102,24 @@ class PersistentRepository:
         except TypeError:
             raise DoesNotExistErrorTable(table_name)
 
-    def update(self, entity_id: UUID,
-               column_name: str, table_name: str,
-               changes: Dict[str, Any]) -> None:
+    def update(
+        self,
+        entity_id: UUID,
+        column_name: str,
+        table_name: str,
+        changes: Dict[str, Any],
+    ) -> None:
         try:
             self.read_one(entity_id, table_name, column_name)
             set_sql = ", ".join(
                 [
                     "{}={}".format(
                         k,
-                        '"' + str(changes[k]) + '"'
-                        if isinstance(changes[k], str)
-                        else changes[k],
+                        (
+                            '"' + str(changes[k]) + '"'
+                            if isinstance(changes[k], str)
+                            else changes[k]
+                        ),
                     )
                     for k in changes.keys()
                 ]

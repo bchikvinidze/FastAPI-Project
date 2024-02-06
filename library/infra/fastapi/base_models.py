@@ -3,7 +3,6 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-
 # Requests:
 
 
@@ -32,12 +31,10 @@ class TransactionItem(BaseModel):
     # key: UUID
 
 
-
 class StatisticsItem(BaseModel):
     count_transactions: int
     total_profit: float
     # key: UUID
-
 
 
 # Envelopes for item

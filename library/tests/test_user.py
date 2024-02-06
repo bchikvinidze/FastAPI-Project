@@ -1,6 +1,7 @@
 from unittest.mock import ANY
 
 from fastapi.testclient import TestClient
+
 from library.core.bitcoin_converter import BitcoinToCurrency
 
 
@@ -16,7 +17,7 @@ def test_user_should_persist(client: TestClient) -> None:
     response = client.post("/users")
     api_key = response.json()["user"]["key"]
 
-    response = client.get(f"/users/{api_key}", headers={'x-api-key': api_key})
+    response = client.get(f"/users/{api_key}", headers={"x-api-key": api_key})
 
     assert response.status_code == 200
     assert response.json() == {"user": {"key": ANY}}

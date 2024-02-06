@@ -1,19 +1,9 @@
-"""
-feedback rac mivige msgavss midgomaze:
-Open-Closed Principle: SerializerForDB ცოტა არღვევს:
-ახალი ობიექტის სერიალიზაცია/დესერიალიზაცია რომ მოგვინდეს ამ კლასში მოგვიწევს ცვლილებების შეტანა.
-თითქმის ყველგან სადაც ამ სერიალიზატორ კლასს იყენებ მაინც ახალი ინსტანსის შექმნა გიწევს
-და თითქმის ყველგან კონკრეტულ deserialize მეთოდებს იყენებ (deserialize_unit, deserialize_product...),
-რაც, ცალკე კლასად გამოყოფა რისთვისაც შეიძლება გინდოდეს მაგ მიზანსვე ეწინააღმდეგება.
-აჯობებდა Serializable ინტერფეისი გქონოდა და ობიექტებშივე გაგეწერა serialization/deserialization ლოგიკა.
-"""
-
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from typing import Dict, List, TypeVar
 from uuid import UUID
 
-from dataclasses import dataclass, field
 from dacite import Config, from_dict
 
 import library.core.entities as entities
