@@ -44,9 +44,7 @@ class Service:
         self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> User | Wallet | IEntity:
         res = self.repo.read_one(entity_id, table_name, column_name)
-        if (
-            table_name == "wallets"
-        ):
+        if table_name == "wallets":
             return SerializeWallet().deserialize(res)
         return SerializeUser().deserialize(res)
 
@@ -130,18 +128,14 @@ class Service:
         from_list = self.repo.read_multi(address, "transactions", "address_from")
         to_list = self.repo.read_multi(address, "transactions", "address_to")
         for item in from_list + to_list:
-            transactions.append(
-                SerializeTransaction().deserialize(input_data=item)
-            )
+            transactions.append(SerializeTransaction().deserialize(input_data=item))
         return transactions
 
     def get_statistics(self) -> Statistic:
         transactions = self.repo.read_all("transactions")
         result = []
         for item in transactions:
-            result.append(
-                SerializeTransaction().deserialize(input_data=item)
-            )
+            result.append(SerializeTransaction().deserialize(input_data=item))
         total_profit = sum(transaction.fee_amount for transaction in result)
         count_transactions = len(result)
         stat = Statistic(
