@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from abc import abstractmethod, ABC
+
 from dataclasses import dataclass
-from typing import List
-from uuid import UUID
+from typing import List, Protocol, cast, Any
+from uuid import UUID, uuid4
 
 from constants import TRANSACTION_FEE, WALLET_CNT_LIMIT
-from library.core.entities import IEntity, Statistic, Transaction, User, Wallet
+from library.core import entities
+from library.core.entities import IEntity, Statistic, Transaction, User, Wallet, Entity
 from library.core.errors import (
     SendAmountExceedsBalance,
     WalletAddressNotOwn,
@@ -20,50 +23,124 @@ from library.core.serialization import (
 from library.infra.repository.repository import Repository
 
 
-@dataclass
-class Service:
-    repo: Repository
+class ICommand(ABC):
 
-    def create(self, input_entity: IEntity, table_name: str) -> None:
-        self.repo.create(input_entity, table_name)
+    @abstractmethod
+    def execute(self) -> None:
+        pass
 
-    def create_wallet(self, wallet: Wallet) -> None:
-        wallet_count = len(self.repo.read_multi(wallet.user_key, "wallets"))
-        if wallet_count >= WALLET_CNT_LIMIT:
-            raise WalletLimitReached
-        input_entity: IEntity = wallet
-        self.repo.create(input_entity, "wallets")
+    @abstractmethod
+    def read_execute(self, entity_id: UUID, column_name: str = "key") -> Any:
+        pass
 
-    def read_wallet_bitcoins(
-        self, entity_id: UUID, table_name: str, column_name: str = "key"
-    ) -> float:
-        res = self.repo.read_one(entity_id, table_name, column_name)
-        return SerializeWallet().deserialize(res).bitcoins
 
-    def read(
-        self, entity_id: UUID, table_name: str, column_name: str = "key"
-    ) -> User | Wallet | IEntity:
-        res = self.repo.read_one(entity_id, table_name, column_name)
-        if (
-            table_name == "wallets"
-        ):
-            return SerializeWallet().deserialize(res)
+class UserService(ICommand):
+    def __init__(self, repo: Repository, table_name: str = "users", input_entity: IEntity = Entity()) -> None:
+        self.repo = repo
+        self.input_entity = input_entity
+        self.table_name = table_name
+
+    def execute(self) -> None:
+        self.repo.create(self.input_entity, self.table_name)
+
+    def read_execute(self, entity_id: UUID, column_name: str = "key") -> Any:
+        res = self.repo.read_one(entity_id, self.table_name, column_name)
         return SerializeUser().deserialize(res)
 
-    def exists(
-        self, entity_id: UUID, table_name: str, column_name: str = "key"
-    ) -> bool:
-        res = self.repo.read_one(entity_id, table_name, column_name)
-        if len(res) == 0:
-            return False
-        return True
+
+class WalletService(ICommand):
+
+    def __init__(self, repo: Repository, table_name: str = "wallets", input_entity: IEntity = Entity()) -> None:
+        self.repo = repo
+        self.input_entity = input_entity
+        self.table_name = table_name
+
+    def execute(self) -> None:
+        wallet = cast(entities.Wallet, self.input_entity)
+        wallet_count = len(self.repo.read_multi(wallet.user_key, self.table_name))
+        if wallet_count >= WALLET_CNT_LIMIT:
+            raise WalletLimitReached
+        self.repo.create(self.input_entity, self.table_name)
+
+    def read_execute(self, entity_id: UUID, column_name: str = "key") -> Any:
+        res = self.repo.read_one(entity_id, self.table_name, column_name)
+        return SerializeWallet().deserialize(res)
+
+    def read_bitcoins(self, entity_id: UUID, column_name: str = "key") -> float:
+        return cast(entities.Wallet, self.read_execute(entity_id, column_name)).bitcoins
+
+
+class TransactionService(ICommand):
+    def __init__(self, repo: Repository, table_name: str = "transactions", input_entity: IEntity = Entity()) -> None:
+        self.repo = repo
+        self.input_entity = input_entity
+        self.table_name = table_name
+
+    def execute(self) -> None:
+        self.repo.create(self.input_entity, self.table_name)
+
+    def read_execute(self, entity_id: UUID, column_name: str = "key") -> Any:
+        user_wallets = self.repo.read_multi(entity_id, "wallets")
+        transactions = []
+        for wallet_raw in user_wallets:
+            wallet_item = SerializeWallet().deserialize(wallet_raw)
+
+            list_result = self.repo.read_multi(
+                wallet_item.address, "transactions", "address_from"
+            )
+            for list_item in list_result:
+                transactions.append(
+                    SerializeTransaction().deserialize(input_data=list_item)
+                )
+
+        return transactions
+
+    def read_by_address(self, address: UUID) -> List[Transaction]:
+        transactions = []
+        from_list = self.repo.read_multi(address, "transactions", "address_from")
+        to_list = self.repo.read_multi(address, "transactions", "address_to")
+        for item in from_list + to_list:
+            transactions.append(
+                SerializeTransaction().deserialize(input_data=item)
+            )
+        return transactions
+
+
+class StatisticsService(ICommand):
+
+    def __init__(self, repo: Repository, table_name: str, input_entity: IEntity = Entity()) -> None:
+        self.repo = repo
+        self.input_entity = input_entity
+        self.table_name = table_name
+
+    def execute(self) -> None:
+        pass
+
+    def read_execute(self, entity_id: UUID = uuid4(), column_name: str = "key") -> Any:
+        transactions = self.repo.read_all(self.table_name)
+        result = []
+        for item in transactions:
+            result.append(
+                SerializeTransaction().deserialize(input_data=item)
+            )
+        total_profit = sum(transaction.fee_amount for transaction in result)
+        count_transactions = len(result)
+        stat = Statistic(
+            count_transactions=count_transactions, total_profit=total_profit
+        )
+        return stat
+
+
+@dataclass
+class TransferService:
+    repo: Repository
 
     def transfer(
-        self,
-        wallet_from_address: UUID,
-        wallet_to_address: UUID,
-        send_amount: float,
-        x_api_key: UUID,
+            self,
+            wallet_from_address: UUID,
+            wallet_to_address: UUID,
+            send_amount: float,
+            x_api_key: UUID,
     ) -> None:
         wallet_from = SerializeWallet().deserialize(
             self.repo.read_one(wallet_from_address, "wallets", "address")
@@ -98,53 +175,13 @@ class Service:
             amount=send_amount,
             fee_amount=fee_amount,
         )
-        self.create(transaction, "transactions")
+        TransactionService(self.repo, input_entity=transaction).execute()
 
     def read_multi(
-        self, entity_id: UUID, table_name: str, column_name: str = "key"
+            self, entity_id: UUID, table_name: str, column_name: str = "key"
     ) -> List[IEntity] | List[Wallet] | List[Transaction] | List[User]:
         list_result = self.repo.read_multi(entity_id, table_name, column_name)
         deserialized = []
         for list_item in list_result:
             deserialized.append(Serializer().deserialize(list_item))
         return deserialized
-
-    def read_transactions(self, user_key: UUID) -> List[Transaction]:
-        user_wallets = self.repo.read_multi(user_key, "wallets")
-        transactions = []
-        for wallet_raw in user_wallets:
-            wallet_item = SerializeWallet().deserialize(wallet_raw)
-
-            list_result = self.repo.read_multi(
-                wallet_item.address, "transactions", "address_from"
-            )
-            for list_item in list_result:
-                transactions.append(
-                    SerializeTransaction().deserialize(input_data=list_item)
-                )
-
-        return transactions
-
-    def read_transactions_by_address(self, address: UUID) -> List[Transaction]:
-        transactions = []
-        from_list = self.repo.read_multi(address, "transactions", "address_from")
-        to_list = self.repo.read_multi(address, "transactions", "address_to")
-        for item in from_list + to_list:
-            transactions.append(
-                SerializeTransaction().deserialize(input_data=item)
-            )
-        return transactions
-
-    def get_statistics(self) -> Statistic:
-        transactions = self.repo.read_all("transactions")
-        result = []
-        for item in transactions:
-            result.append(
-                SerializeTransaction().deserialize(input_data=item)
-            )
-        total_profit = sum(transaction.fee_amount for transaction in result)
-        count_transactions = len(result)
-        stat = Statistic(
-            count_transactions=count_transactions, total_profit=total_profit
-        )
-        return stat
