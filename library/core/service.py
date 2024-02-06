@@ -85,7 +85,7 @@ class Service:
         wallet_to_initial = wallet_to.bitcoins
 
         if wallet_from_initial < send_amount:
-            raise SendAmountExceedsBalance(wallet_from_initial, send_amount)
+            raise SendAmountExceedsBalance(send_amount)
 
         fee_percent = 0.0
         if wallet_from.user_key != wallet_to.user_key:

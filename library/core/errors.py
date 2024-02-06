@@ -40,9 +40,9 @@ class WalletAddressNotOwn(WebException):
 
 
 class SendAmountExceedsBalance(WebException):
-    def __init__(self, balance: float, amount: float) -> None:
+    def __init__(self, amount: float) -> None:
         self.status_code = 403
-        self.msg = f"Send amount f{amount} less than balance f{balance}"
+        self.msg = f"Send amount {amount} less than balance"
 
 
 class UnsuccessfulRequest(Exception):

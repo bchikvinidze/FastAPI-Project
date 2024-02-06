@@ -59,7 +59,7 @@ def test_transaction_send_from_not_own(client: TestClient) -> None:
     response2 = client.post("/wallets", headers={'x-api-key': api_key2})
     resp_wallet2 = response2.json()['usd_wallet']
     foreign_wallet = resp_wallet2['wallet_address']
-    expected_msg = "Can only transfer from own wallet addresses"
+    expected_msg = f"Error for address f{foreign_wallet}, can only transfer from own wallet addresses"
 
     # do transaction
     send_amount = 0.7
@@ -90,7 +90,8 @@ def test_transaction_overspend(client: TestClient) -> None:
     wallet_to = resp_wallet['wallet_address']
 
     # do transaction
-    send_amount = 10
+    send_amount = 10.0
+    exp_msg = f"Send amount {send_amount} less than balance"
     transaction_response = client.post("/transactions",
                                        headers={'x-api-key': api_key},
                                        json={"address_from": wallet_from,
@@ -100,7 +101,7 @@ def test_transaction_overspend(client: TestClient) -> None:
 
     assert transaction_response.status_code == 403
     assert transaction_response.json() == {
-        'error': {'message': "Can only transfer if balance is more than send amount"}}
+        'error': {'message': exp_msg}}
 
 
 def test_transactions_get(client: TestClient) -> None:
