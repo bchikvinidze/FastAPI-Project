@@ -43,7 +43,7 @@ class UserItemEnvelope(BaseModel):
 
 
 class StatisticsItemEnvelope(BaseModel):
-    stat: StatisticsItem
+    statistics: StatisticsItem
 
 
 class UsdWalletItemEnvelope(BaseModel):

@@ -29,13 +29,12 @@ def test_statistics(client: TestClient) -> None:
                                              "amount": send_amount})
 
     statistics_response = client.get("/statistics", headers={'x-api-key': ADMIN_API_KEY})
-    print("here", statistics_response.json())
-    # transaction_number = statistics_response.json()['count_transactions']
-    # platform_profit = statistics_response.json()['total_profit']
+    # print("here", statistics_response.json())
+    transaction_number = statistics_response.json()['statistics']['count_transactions']
+    platform_profit = statistics_response.json()['statistics']['total_profit']
 
     assert transaction_response.status_code == 201
     assert transaction_response.json() == {}
     assert statistics_response.status_code == 200
-    # assert 'x-api-key' in statistics_response.request.headers
-    # assert transaction_number == 1
-    # assert platform_profit == 0.015
+    assert transaction_number == 1
+    assert platform_profit == 0

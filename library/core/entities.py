@@ -44,8 +44,9 @@ class Transaction(Entity):
     key: UUID = field(default_factory=uuid4)
 
 
-@dataclass(kw_only=True)
-class Statistic(Entity):
+# @dataclass(kw_only=True)
+@dataclass
+class Statistic:
     count_transactions: int
     total_profit: float
-    key: UUID = field(default_factory=uuid4)
+    # key: UUID = field(default_factory=uuid4)
