@@ -58,12 +58,8 @@ def create_wallet(
         return {"usd_wallet": usd_wallet}
     except WebException as we:
         return we.json_response()
-    # except ApiKeyWrong:
-    #     return ApiKeyWrong().json_response()
 
 
-# es shesacvlelia: query parameters ar unda iyos rogorc gavige.
-# request-shi unda iyos es wallet from, to da amount.
 @api.post(
     "/transactions",
     status_code=201,
@@ -87,12 +83,6 @@ def create_transaction(
         return JSONResponse(status_code=201, content={})
     except WebException as we:
         return we.json_response()
-    # except ApiKeyWrong as e:
-    #     return ApiKeyWrong().json_response()
-    # except WalletAddressNotOwn:
-    #     return WalletAddressNotOwn().json_response()
-    # except SendAmountExceedsBalance:
-    #     return SendAmountExceedsBalance().json_response()
 
 
 @api.get(
@@ -110,12 +100,6 @@ def read_one_user(
         return {"user": Service(repo_dependable).read(user_key, "users")}
     except WebException as we:
         return we.json_response()
-    # except DoesNotExistError:
-    #     return DoesNotExistError(
-    #         "User", "key", str(user_key)
-    #     ).json_response()
-    # except ApiKeyWrong:
-    #     return ApiKeyWrong().json_response()
 
 
 @api.get(
@@ -140,12 +124,6 @@ def read_wallet_address(
         }
     except WebException as we:
         return we.json_response()
-    # except DoesNotExistError:
-    #     return DoesNotExistError(
-    #         "Wallet", "address", str(address)
-    #     ).json_response()
-    # except ApiKeyWrong:
-    #     return ApiKeyWrong.json_response()
 
 
 @api.get(
@@ -164,8 +142,6 @@ def read_transactions(
         return {"transactions": transactions}
     except WebException as we:
         return we.json_response()
-    # except ApiKeyWrong:
-    #     return ApiKeyWrong().json_response()
 
 
 @api.get(
@@ -184,8 +160,6 @@ def read_wallet_transactions(
         return {"transactions": transactions}
     except WebException as we:
         return we.json_response()
-    # except ApiKeyWrong:
-    #     return ApiKeyWrong().json_response()
 
 
 @api.get(
