@@ -70,7 +70,7 @@ def create_wallet(
     "/transactions",
     status_code=201,
     response_model=TransactionItem,
-    tags=["Transactions"],
+    tags=["transactions"],
 )
 def create_transaction(
     transaction: dict[str, UUID | float],
