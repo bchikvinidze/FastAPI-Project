@@ -1,3 +1,9 @@
+Project was created by:
+nchik19@freeuni.edu.ge
+mjava20@freeuni.edu.ge 
+ngogo20@freeuni.edu.ge 
+lekse20@freeuni.edu.ge
+
 Project was developed fully using TDD.
 
 Before running the code, run mypy --install-types
