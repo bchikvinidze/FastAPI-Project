@@ -126,3 +126,17 @@ def test_transactions_get(client: TestClient) -> None:
     assert from_resp.json() == get_response.json()
     assert from_resp.status_code == 200
     assert to_resp.status_code == 200
+
+
+def test_transaction_from_and_to_same_address(client: TestClient) -> None:
+    api_key = str(create_user(client))
+    wallet, _, _ = create_wallet(client, api_key)
+
+    send_amount = 0.7
+    transaction_response = make_transaction(
+        client, api_key, str(wallet), str(wallet), send_amount
+    )
+    exp_msg = 'not allowed to transfer to same address.'
+
+    assert transaction_response[0] == 404
+    assert transaction_response[1].json() == {"error": {"message": exp_msg}}

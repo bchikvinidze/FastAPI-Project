@@ -11,7 +11,7 @@ from library.core.entities import Entity, IEntity, Statistic, Transaction, User,
 from library.core.errors import (
     SendAmountExceedsBalance,
     WalletAddressNotOwn,
-    WalletLimitReached,
+    WalletLimitReached, SameAddressTransferError,
 )
 from library.core.serialization import (
     Serializer,
@@ -154,6 +154,9 @@ class TransferService:
         send_amount: float,
         x_api_key: UUID,
     ) -> None:
+        if wallet_to_address == wallet_from_address:
+            raise SameAddressTransferError
+
         wallet_from = SerializeWallet().deserialize(
             self.repo.read_one(wallet_from_address, "wallets", "address")
         )

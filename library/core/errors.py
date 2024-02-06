@@ -59,3 +59,12 @@ class DoesNotExistErrorTable(WebException):
     ):
         self.status_code = 404
         self.msg = table_name + " does not exist."
+
+
+class SameAddressTransferError(WebException):
+    def __init__(
+        self
+    ):
+        self.status_code = 404
+        self.msg = 'not allowed to transfer to same address.'
+
