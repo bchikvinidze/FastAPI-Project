@@ -48,3 +48,12 @@ class Transaction(IEntity):
     amount: float
     fee_amount: float = 0.0
     key: UUID = field(default_factory=uuid4)
+
+
+# @dataclass(kw_only=True)
+@dataclass
+class Statistic:
+    count_transactions: int
+    total_profit: float
+    # key: UUID = field(default_factory=uuid4)
+
